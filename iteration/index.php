@@ -3,6 +3,8 @@ require_once 'config.php';
 if (!current_user_id()) { header('Location: login.php'); exit; }
 
 $filterHashtag = $_GET['hashtag'] ?? null;
+$uid = current_user_id();
+$like = '%@'.current_username().'%';
 ?>
 <!doctype html>
 <html>
@@ -17,10 +19,6 @@ $filterHashtag = $_GET['hashtag'] ?? null;
 textarea {width:100%; min-height:60px;}
 .card-header small{color:#666; font-size:90%;}
 a {text-decoration:none; color:#0366d6;}
-</style>
-</head>
-<body>
-<style>
 .dropdown { position:relative; display:inline-block; }
 .dd-menu {
   display:none;
@@ -43,6 +41,8 @@ a {text-decoration:none; color:#0366d6;}
 .dd-menu.show { display:block; }
 .dd-item:hover { background:#f5f5f5; cursor:pointer; }
 </style>
+</head>
+<body>
 
 <div style="max-width:1200px;margin:10px auto;display:flex;justify-content:space-between;align-items:center;">
 
@@ -53,45 +53,60 @@ a {text-decoration:none; color:#0366d6;}
   <div style="display:flex;gap:15px;align-items:center;">
 
     <?php
-    $uid = current_user_id();
-
-    $stmt = $mysqli->prepare("SELECT COUNT(*) AS cnt FROM posts WHERE content LIKE ? AND user_id != ?");
-    $like = '%@'.current_username().'%';
-    $stmt->bind_param("si",$like,$uid);
+    $stmt = $mysqli->prepare("
+      SELECT COUNT(*) AS cnt
+      FROM posts p
+      WHERE p.content LIKE ?
+        AND p.user_id != ?
+        AND p.created_at > IFNULL(
+          (SELECT last_seen_mentions FROM users WHERE user_id = ?),
+          '1970-01-01'
+        )
+    ");
+    $stmt->bind_param("sii",$like,$uid,$uid);
     $stmt->execute();
     $m = $stmt->get_result()->fetch_assoc()['cnt'];
 
+  
     $stmt = $mysqli->prepare("
       SELECT COUNT(*) AS cnt
       FROM reposts r
       JOIN posts p ON r.post_id = p.post_id
       WHERE p.user_id = ?
-");
-
-    $stmt->bind_param("i",$uid);
+        AND r.created_at > IFNULL(
+          (SELECT last_seen_shares FROM users WHERE user_id = ?),
+          '1970-01-01'
+        )
+    ");
+    $stmt->bind_param("ii",$uid,$uid);
     $stmt->execute();
     $s = $stmt->get_result()->fetch_assoc()['cnt'];
     ?>
 
+ 
     <div class="dropdown">
-      <a href="#" onclick="toggleDropdown('mentions');return false;">
-        🔔 Mentions (<?= $m ?>)
-      </a>
-
+      <a href="#" onclick="toggleDropdown('mentions', this);return false;">
+  🔔 Mentions <span class="badge"><?= $m ?></span>
+    </a>
       <div id="mentions" class="dd-menu">
         <?php
         $stmt = $mysqli->prepare("
-          SELECT p.content, p.created_at, u.username
+          SELECT u.username AS username, p.content AS content, p.created_at AS created_at
           FROM posts p
           JOIN users u ON p.user_id = u.user_id
           WHERE p.content LIKE ?
+            AND p.user_id != ?
+            AND p.created_at > IFNULL(
+              (SELECT last_seen_mentions FROM users WHERE user_id = ?),
+              '1970-01-01'
+            )
           ORDER BY p.created_at DESC
           LIMIT 10
         ");
-        $stmt->bind_param("s",$like);
+
+        $stmt->bind_param("sii",$like,$uid,$uid);
         $stmt->execute();
         $r = $stmt->get_result();
-
         while ($row = $r->fetch_assoc()) {
             echo "<div class='dd-item'>
               <b>@".htmlspecialchars($row['username'])."</b><br>
@@ -104,26 +119,28 @@ a {text-decoration:none; color:#0366d6;}
     </div>
 
     <div class="dropdown">
-      <a href="#" onclick="toggleDropdown('shares');return false;">
-        🔁 Shares (<?= $s ?>)
+      <a href="#" onclick="toggleDropdown('shares', this);return false;">
+      🔁 Shares <span class="badge"><?= $s ?></span>
       </a>
 
       <div id="shares" class="dd-menu">
         <?php
         $stmt = $mysqli->prepare("
-          SELECT p.content, u.username, r.created_at
+          SELECT u.username AS username, p.content AS content, r.created_at AS created_at
           FROM reposts r
           JOIN posts p ON r.post_id = p.post_id
           JOIN users u ON r.user_id = u.user_id
           WHERE p.user_id = ?
+            AND r.created_at > IFNULL(
+              (SELECT last_seen_shares FROM users WHERE user_id = ?),
+              '1970-01-01'
+            )
           ORDER BY r.created_at DESC
           LIMIT 10
-");
-
-        $stmt->bind_param("i", $uid);
+        ");
+        $stmt->bind_param("ii",$uid,$uid);
         $stmt->execute();
         $r = $stmt->get_result();
-
         while ($row = $r->fetch_assoc()) {
             echo "<div class='dd-item'>
               🔁 <b>".htmlspecialchars($row['username'])."</b> shared:<br>
@@ -136,10 +153,8 @@ a {text-decoration:none; color:#0366d6;}
     </div>
 
     <a href="logout.php">Logout</a>
-
   </div>
 </div>
-
 
 <div class="container">
   <div class="left">
@@ -153,7 +168,7 @@ a {text-decoration:none; color:#0366d6;}
       <h4>Following hashtags</h4>
       <?php
       $stmt = $mysqli->prepare("SELECT h.tag_name FROM followed_hashtags fh JOIN hashtags h ON fh.hashtag_id=h.hashtag_id WHERE fh.user_id = ? LIMIT 10");
-      $uid = current_user_id(); $stmt->bind_param('i',$uid); $stmt->execute(); $r=$stmt->get_result();
+      $stmt->bind_param('i',$uid); $stmt->execute(); $r=$stmt->get_result();
       while($row=$r->fetch_assoc()){
         echo '<div><a href="index.php?hashtag='.urlencode($row['tag_name']).'">#'.htmlspecialchars($row['tag_name']).'</a></div>';
       }
@@ -205,11 +220,24 @@ a {text-decoration:none; color:#0366d6;}
 </div>
 
 <script>
-function toggleDropdown(id) {
-  document.querySelectorAll('.dd-menu').forEach(el => {
-    if (el.id !== id) el.classList.remove('show');
+function toggleDropdown(id, el) {
+  document.querySelectorAll('.dd-menu').forEach(menu => {
+    if (menu.id !== id) menu.classList.remove('show');
   });
-  document.getElementById(id).classList.toggle('show');
+
+  let box = document.getElementById(id);
+  let open = box.classList.toggle('show');
+
+  if (open) {
+    markSeen(id);
+    let badge = el.querySelector('.badge');
+    if(badge) badge.textContent = '0';
+  }
+}
+
+
+function markSeen(type) {
+  fetch("mark_seen.php?type=" + type);
 }
 
 document.addEventListener("click", function(e) {
