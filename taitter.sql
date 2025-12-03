@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 03, 2025 at 02:18 PM
+-- Generation Time: Dec 03, 2025 at 03:02 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -164,8 +164,7 @@ CREATE TABLE `reposts` (
 --
 
 INSERT INTO `reposts` (`repost_id`, `user_id`, `post_id`, `created_at`) VALUES
-(1, 5, 2, '2025-12-03 10:16:48'),
-(6, 5, 6, '2025-12-03 13:16:09');
+(1, 5, 2, '2025-12-03 10:16:48');
 
 -- --------------------------------------------------------
 
@@ -180,19 +179,21 @@ CREATE TABLE `users` (
   `password_hash` varchar(255) NOT NULL,
   `bio` text DEFAULT NULL,
   `profile_picture_url` varchar(255) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `last_seen_mentions` datetime DEFAULT NULL,
+  `last_seen_shares` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`user_id`, `username`, `email`, `password_hash`, `bio`, `profile_picture_url`, `created_at`) VALUES
-(1, 'matti', 'matti@example.com', 'hash123', 'Koodari Salosta', NULL, '2025-12-02 08:49:54'),
-(2, 'liisa', 'liisa@example.com', 'hash456', 'Musiikin ystävä', NULL, '2025-12-02 08:49:54'),
-(3, 'pekka', 'pekka@example.com', 'hash789', 'Ruoka ja matkailu', NULL, '2025-12-02 08:49:54'),
-(4, 'Vesku', 'weex77@gmail.com', '$2y$10$mXuS2yfV6awrmP5cmNZr0eDjreJemJoKClDqdXidhRuguNsyGr8sC', NULL, NULL, '2025-12-03 10:00:45'),
-(5, 'Jenni', 'jm5206@edu.turku.fi', '$2y$10$W8fVdFzED3tsFjb2ToemK.NQxjj7BovSYFGvkwHXnsrf49HahYFGq', 'Testing...', 'uploads/pfp_5_1764764848.png', '2025-12-03 10:14:31');
+INSERT INTO `users` (`user_id`, `username`, `email`, `password_hash`, `bio`, `profile_picture_url`, `created_at`, `last_seen_mentions`, `last_seen_shares`) VALUES
+(1, 'Matti', 'matti@example.com', 'hash123', 'Koodari Salosta', 'uploads/pfp_1_1764770409.jpg', '2025-12-02 08:49:54', NULL, NULL),
+(2, 'Liisa', 'liisa@example.com', 'hash456', 'Musiikin ystävä', 'uploads/pfp_2_1764770532.jpg', '2025-12-02 08:49:54', NULL, NULL),
+(3, 'pekka', 'pekka@example.com', 'hash789', 'Ruoka ja matkailu', NULL, '2025-12-02 08:49:54', NULL, NULL),
+(4, 'Vesku', 'weex77@gmail.com', '$2y$10$mXuS2yfV6awrmP5cmNZr0eDjreJemJoKClDqdXidhRuguNsyGr8sC', NULL, NULL, '2025-12-03 10:00:45', NULL, NULL),
+(5, 'Jenni', 'jm5206@edu.turku.fi', '$2y$10$W8fVdFzED3tsFjb2ToemK.NQxjj7BovSYFGvkwHXnsrf49HahYFGq', 'Kahvia, koodausta ja testausta', 'uploads/pfp_5_1764764848.png', '2025-12-03 10:14:31', NULL, '2025-12-03 15:49:29');
 
 --
 -- Indexes for dumped tables
@@ -307,7 +308,7 @@ ALTER TABLE `post_hashtags`
 -- AUTO_INCREMENT for table `reposts`
 --
 ALTER TABLE `reposts`
-  MODIFY `repost_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `repost_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `users`
