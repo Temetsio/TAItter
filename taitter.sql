@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 03, 2025 at 03:02 PM
+-- Generation Time: Dec 03, 2025 at 07:35 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -80,6 +80,19 @@ INSERT INTO `hashtags` (`hashtag_id`, `tag_name`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `likes`
+--
+
+CREATE TABLE `likes` (
+  `like_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `post_id` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `mentions`
 --
 
@@ -106,20 +119,21 @@ CREATE TABLE `posts` (
   `post_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `content` varchar(144) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `edited_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `posts`
 --
 
-INSERT INTO `posts` (`post_id`, `user_id`, `content`, `created_at`) VALUES
-(1, 1, 'Moi kaikki! Tämä on ensimmäinen viestini #aloitus', '2025-12-02 08:49:54'),
-(2, 1, 'Koodausta ja kahvia #ohjelmointi #kahvi', '2025-12-02 08:49:54'),
-(3, 2, 'Rakkautta musiikkiin! @matti tule kuuntelemaan #musiikki', '2025-12-02 08:49:54'),
-(5, 4, 'Testiä #ohjelmointi', '2025-12-03 10:01:08'),
-(6, 5, 'Tarvitsen lisää kahvia #kahvi #ohjelmointi', '2025-12-03 10:17:21'),
-(7, 5, '@Vesku moi', '2025-12-03 10:59:58');
+INSERT INTO `posts` (`post_id`, `user_id`, `content`, `created_at`, `edited_at`) VALUES
+(1, 1, 'Moi kaikki! Tämä on ensimmäinen viestini #aloitus', '2025-12-02 08:49:54', NULL),
+(2, 1, 'Koodausta ja kahvia #ohjelmointi #kahvi', '2025-12-02 08:49:54', NULL),
+(3, 2, 'Rakkautta musiikkiin! @matti tule kuuntelemaan #musiikki', '2025-12-02 08:49:54', NULL),
+(5, 4, 'Testiä #ohjelmointi', '2025-12-03 10:01:08', NULL),
+(6, 5, 'Tarvitsen lisää kahvia #kahvi #ohjelmointi', '2025-12-03 10:17:21', '2025-12-03 16:40:36'),
+(7, 5, '@Vesku moi', '2025-12-03 10:59:58', '2025-12-03 19:13:31');
 
 -- --------------------------------------------------------
 
@@ -143,8 +157,8 @@ INSERT INTO `post_hashtags` (`id`, `post_id`, `hashtag_id`) VALUES
 (4, 2, 3),
 (5, 3, 4),
 (1, 5, 2),
-(8, 6, 2),
-(7, 6, 3);
+(12, 6, 2),
+(11, 6, 3);
 
 -- --------------------------------------------------------
 
@@ -181,19 +195,20 @@ CREATE TABLE `users` (
   `profile_picture_url` varchar(255) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `last_seen_mentions` datetime DEFAULT NULL,
-  `last_seen_shares` datetime DEFAULT NULL
+  `last_seen_shares` datetime DEFAULT NULL,
+  `last_seen_likes` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`user_id`, `username`, `email`, `password_hash`, `bio`, `profile_picture_url`, `created_at`, `last_seen_mentions`, `last_seen_shares`) VALUES
-(1, 'Matti', 'matti@example.com', 'hash123', 'Koodari Salosta', 'uploads/pfp_1_1764770409.jpg', '2025-12-02 08:49:54', NULL, NULL),
-(2, 'Liisa', 'liisa@example.com', 'hash456', 'Musiikin ystävä', 'uploads/pfp_2_1764770532.jpg', '2025-12-02 08:49:54', NULL, NULL),
-(3, 'pekka', 'pekka@example.com', 'hash789', 'Ruoka ja matkailu', NULL, '2025-12-02 08:49:54', NULL, NULL),
-(4, 'Vesku', 'weex77@gmail.com', '$2y$10$mXuS2yfV6awrmP5cmNZr0eDjreJemJoKClDqdXidhRuguNsyGr8sC', NULL, NULL, '2025-12-03 10:00:45', NULL, NULL),
-(5, 'Jenni', 'jm5206@edu.turku.fi', '$2y$10$W8fVdFzED3tsFjb2ToemK.NQxjj7BovSYFGvkwHXnsrf49HahYFGq', 'Kahvia, koodausta ja testausta', 'uploads/pfp_5_1764764848.png', '2025-12-03 10:14:31', NULL, '2025-12-03 15:49:29');
+INSERT INTO `users` (`user_id`, `username`, `email`, `password_hash`, `bio`, `profile_picture_url`, `created_at`, `last_seen_mentions`, `last_seen_shares`, `last_seen_likes`) VALUES
+(1, 'Matti', 'matti@example.com', 'hash123', 'Koodari Salosta', 'uploads/pfp_1_1764770409.jpg', '2025-12-02 08:49:54', NULL, NULL, NULL),
+(2, 'Liisa', 'liisa@example.com', 'hash456', 'Musiikin ystävä', 'uploads/pfp_2_1764770532.jpg', '2025-12-02 08:49:54', NULL, NULL, NULL),
+(3, 'pekka', 'pekka@example.com', 'hash789', 'Ruoka ja matkailu', NULL, '2025-12-02 08:49:54', NULL, NULL, NULL),
+(4, 'Vesku', 'weex77@gmail.com', '$2y$10$mXuS2yfV6awrmP5cmNZr0eDjreJemJoKClDqdXidhRuguNsyGr8sC', NULL, NULL, '2025-12-03 10:00:45', NULL, NULL, NULL),
+(5, 'Jenni', 'jm5206@edu.turku.fi', '$2y$10$W8fVdFzED3tsFjb2ToemK.NQxjj7BovSYFGvkwHXnsrf49HahYFGq', 'Kahvia, koodausta ja testausta', 'uploads/pfp_5_1764764848.png', '2025-12-03 10:14:31', NULL, '2025-12-03 16:18:08', '2025-12-03 19:13:53');
 
 --
 -- Indexes for dumped tables
@@ -223,6 +238,14 @@ ALTER TABLE `hashtags`
   ADD PRIMARY KEY (`hashtag_id`),
   ADD UNIQUE KEY `tag_name` (`tag_name`),
   ADD KEY `idx_hashtags_tag_name` (`tag_name`);
+
+--
+-- Indexes for table `likes`
+--
+ALTER TABLE `likes`
+  ADD PRIMARY KEY (`like_id`),
+  ADD UNIQUE KEY `unique_like` (`user_id`,`post_id`),
+  ADD KEY `post_id` (`post_id`);
 
 --
 -- Indexes for table `mentions`
@@ -284,7 +307,13 @@ ALTER TABLE `follows`
 -- AUTO_INCREMENT for table `hashtags`
 --
 ALTER TABLE `hashtags`
-  MODIFY `hashtag_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `hashtag_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
+-- AUTO_INCREMENT for table `likes`
+--
+ALTER TABLE `likes`
+  MODIFY `like_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
 
 --
 -- AUTO_INCREMENT for table `mentions`
@@ -302,13 +331,13 @@ ALTER TABLE `posts`
 -- AUTO_INCREMENT for table `post_hashtags`
 --
 ALTER TABLE `post_hashtags`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `reposts`
 --
 ALTER TABLE `reposts`
-  MODIFY `repost_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `repost_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -333,6 +362,13 @@ ALTER TABLE `followed_hashtags`
 ALTER TABLE `follows`
   ADD CONSTRAINT `follows_ibfk_1` FOREIGN KEY (`follower_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `follows_ibfk_2` FOREIGN KEY (`following_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `likes`
+--
+ALTER TABLE `likes`
+  ADD CONSTRAINT `likes_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `likes_ibfk_2` FOREIGN KEY (`post_id`) REFERENCES `posts` (`post_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `mentions`
