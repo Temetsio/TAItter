@@ -20,9 +20,126 @@ a {text-decoration:none; color:#0366d6;}
 </style>
 </head>
 <body>
-<div style="max-width:1200px;margin:10px auto;text-align:right;">
-    Logged in as <strong><?=htmlspecialchars(current_username())?></strong> — <a href="logout.php">Logout</a>
+<style>
+.dropdown { position:relative; display:inline-block; }
+.dd-menu {
+  display:none;
+  position:absolute;
+  right:0;
+  top:26px;
+  background:#fff;
+  border:1px solid #ccc;
+  width:320px;
+  max-height:300px;
+  overflow-y:auto;
+  z-index:999;
+}
+.dd-menu div {
+  padding:8px;
+  border-bottom:1px solid #eee;
+  font-size:90%;
+}
+.dd-menu small { color:#666; }
+.dd-menu.show { display:block; }
+.dd-item:hover { background:#f5f5f5; cursor:pointer; }
+</style>
+
+<div style="max-width:1200px;margin:10px auto;display:flex;justify-content:space-between;align-items:center;">
+
+  <div>
+    Logged in as <strong><?=htmlspecialchars(current_username())?></strong>
+  </div>
+
+  <div style="display:flex;gap:15px;align-items:center;">
+
+    <?php
+    $uid = current_user_id();
+
+    $stmt = $mysqli->prepare("SELECT COUNT(*) AS cnt FROM posts WHERE content LIKE ? AND user_id != ?");
+    $like = '%@'.current_username().'%';
+    $stmt->bind_param("si",$like,$uid);
+    $stmt->execute();
+    $m = $stmt->get_result()->fetch_assoc()['cnt'];
+
+    $stmt = $mysqli->prepare("
+      SELECT COUNT(*) AS cnt
+      FROM reposts r
+      JOIN posts p ON r.post_id = p.post_id
+      WHERE p.user_id = ?
+");
+
+    $stmt->bind_param("i",$uid);
+    $stmt->execute();
+    $s = $stmt->get_result()->fetch_assoc()['cnt'];
+    ?>
+
+    <div class="dropdown">
+      <a href="#" onclick="toggleDropdown('mentions');return false;">
+        🔔 Mentions (<?= $m ?>)
+      </a>
+
+      <div id="mentions" class="dd-menu">
+        <?php
+        $stmt = $mysqli->prepare("
+          SELECT p.content, p.created_at, u.username
+          FROM posts p
+          JOIN users u ON p.user_id = u.user_id
+          WHERE p.content LIKE ?
+          ORDER BY p.created_at DESC
+          LIMIT 10
+        ");
+        $stmt->bind_param("s",$like);
+        $stmt->execute();
+        $r = $stmt->get_result();
+
+        while ($row = $r->fetch_assoc()) {
+            echo "<div class='dd-item'>
+              <b>@".htmlspecialchars($row['username'])."</b><br>
+              ".htmlspecialchars($row['content'])."<br>
+              <small>{$row['created_at']}</small>
+            </div>";
+        }
+        ?>
+      </div>
+    </div>
+
+    <div class="dropdown">
+      <a href="#" onclick="toggleDropdown('shares');return false;">
+        🔁 Shares (<?= $s ?>)
+      </a>
+
+      <div id="shares" class="dd-menu">
+        <?php
+        $stmt = $mysqli->prepare("
+          SELECT p.content, u.username, r.created_at
+          FROM reposts r
+          JOIN posts p ON r.post_id = p.post_id
+          JOIN users u ON r.user_id = u.user_id
+          WHERE p.user_id = ?
+          ORDER BY r.created_at DESC
+          LIMIT 10
+");
+
+        $stmt->bind_param("i", $uid);
+        $stmt->execute();
+        $r = $stmt->get_result();
+
+        while ($row = $r->fetch_assoc()) {
+            echo "<div class='dd-item'>
+              🔁 <b>".htmlspecialchars($row['username'])."</b> shared:<br>
+              ".htmlspecialchars($row['content'])."<br>
+              <small>{$row['created_at']}</small>
+            </div>";
+        }
+        ?>
+      </div>
+    </div>
+
+    <a href="logout.php">Logout</a>
+
+  </div>
 </div>
+
 
 <div class="container">
   <div class="left">
@@ -86,5 +203,21 @@ a {text-decoration:none; color:#0366d6;}
     </div>
   </div>
 </div>
+
+<script>
+function toggleDropdown(id) {
+  document.querySelectorAll('.dd-menu').forEach(el => {
+    if (el.id !== id) el.classList.remove('show');
+  });
+  document.getElementById(id).classList.toggle('show');
+}
+
+document.addEventListener("click", function(e) {
+  if (!e.target.closest('.dropdown')) {
+    document.querySelectorAll('.dd-menu').forEach(el => el.classList.remove('show'));
+  }
+});
+</script>
+
 </body>
 </html>
