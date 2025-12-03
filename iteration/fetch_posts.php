@@ -2,6 +2,7 @@
 require_once 'config.php';
 
 $hashtag = $_GET['hashtag'] ?? null;
+$currentUserId = current_user_id();
 
 if ($hashtag) {
     $sql = "
@@ -9,9 +10,13 @@ if ($hashtag) {
             p.post_id,
             p.content,
             p.created_at,
+            p.edited_at,
+            p.user_id,
             u.username,
             u.profile_picture_url,
-            NULL AS reposted_by
+            NULL AS reposted_by,
+            (SELECT COUNT(*) FROM likes WHERE post_id = p.post_id) AS like_count,
+            EXISTS(SELECT 1 FROM likes WHERE post_id = p.post_id AND user_id = ?) AS user_has_liked
         FROM posts p
         JOIN users u ON p.user_id = u.user_id
         JOIN post_hashtags ph ON ph.post_id = p.post_id
@@ -21,7 +26,7 @@ if ($hashtag) {
         LIMIT 100
     ";
     $stmt = $mysqli->prepare($sql);
-    $stmt->bind_param("s", $hashtag);
+    $stmt->bind_param("is", $currentUserId, $hashtag);
 } else {
     $sql = "
         (
@@ -29,9 +34,13 @@ if ($hashtag) {
                 p.post_id,
                 p.content,
                 p.created_at,
+                p.edited_at,
+                p.user_id,
                 u.username,
                 u.profile_picture_url,
-                NULL AS reposted_by
+                NULL AS reposted_by,
+                (SELECT COUNT(*) FROM likes WHERE post_id = p.post_id) AS like_count,
+                EXISTS(SELECT 1 FROM likes WHERE post_id = p.post_id AND user_id = ?) AS user_has_liked
             FROM posts p
             JOIN users u ON p.user_id = u.user_id
         )
@@ -41,9 +50,13 @@ if ($hashtag) {
                 p.post_id,
                 p.content,
                 r.created_at,
+                p.edited_at,
+                p.user_id,
                 u2.username AS username,
                 u2.profile_picture_url,
-                u.username AS reposted_by
+                u.username AS reposted_by,
+                (SELECT COUNT(*) FROM likes WHERE post_id = p.post_id) AS like_count,
+                EXISTS(SELECT 1 FROM likes WHERE post_id = p.post_id AND user_id = ?) AS user_has_liked
             FROM reposts r
             JOIN posts p ON r.post_id = p.post_id
             JOIN users u ON r.user_id = u.user_id      -- who reposted
@@ -53,6 +66,7 @@ if ($hashtag) {
         LIMIT 100
     ";
     $stmt = $mysqli->prepare($sql);
+    $stmt->bind_param("ii", $currentUserId, $currentUserId);
 }
 
 $stmt->execute();
@@ -64,7 +78,14 @@ while ($row = $res->fetch_assoc()) {
     $content = preg_replace('/#([A-Za-z0-9_åäöÅÄÖ\-]+)/u', '<a href="index.php?hashtag=$1">#$1</a>', $content);
     $content = preg_replace('/@([A-Za-z0-9_]+)/', '<a href="profile.php?u=$1">@$1</a>', $content);
 
-    echo "<div class='card'>";
+    $isOwnPost = ($row['user_id'] == $currentUserId);
+    $editedLabel = $row['edited_at'] ? '<small style="color:#999;font-style:italic;margin-left:8px;">(muokattu)</small>' : '';
+    
+    $likeIcon = $row['user_has_liked'] ? '❤️' : '🤍';
+    $likeText = $row['user_has_liked'] ? 'Unlike' : 'Like';
+    $likeCount = $row['like_count'];
+
+    echo "<div class='card' id='post-{$row['post_id']}'>";
 
     if ($row['reposted_by']) {
         echo "<div style='font-size:12px;color:#555;'>🔁 " . 
@@ -77,9 +98,24 @@ while ($row = $res->fetch_assoc()) {
             . htmlspecialchars($row['username']) .
             "</a></strong>
             <small>{$row['created_at']}</small>
+            {$editedLabel}
         </div>
-        <div class='card-body'>$content</div>
+        <div class='post-content-{$row['post_id']}'>$content</div>";
+    
+    if ($isOwnPost) {
+        $rawContent = htmlspecialchars(addslashes($row['content']));
+        echo "<div style='margin-top:8px;'>
+            <button onclick=\"editPost({$row['post_id']}, '{$rawContent}')\">Muokkaa</button>
+        </div>";
+    }
+    
+    echo "
         <div class='card-actions'>
+            <button onclick='toggleLike({$row['post_id']}, this)' id='like-btn-{$row['post_id']}'>
+                <span id='like-icon-{$row['post_id']}'>{$likeIcon}</span>
+                <span id='like-text-{$row['post_id']}'>{$likeText}</span>
+                (<span id='like-count-{$row['post_id']}'>{$likeCount}</span>)
+            </button>
             <form method='post' action='repost.php' style='display:inline;'>
                 <input type='hidden' name='post_id' value='{$row['post_id']}'>
                 <button>Repost</button>

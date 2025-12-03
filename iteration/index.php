@@ -67,7 +67,6 @@ a {text-decoration:none; color:#0366d6;}
     $stmt->execute();
     $m = $stmt->get_result()->fetch_assoc()['cnt'];
 
-  
     $stmt = $mysqli->prepare("
       SELECT COUNT(*) AS cnt
       FROM reposts r
@@ -81,13 +80,27 @@ a {text-decoration:none; color:#0366d6;}
     $stmt->bind_param("ii",$uid,$uid);
     $stmt->execute();
     $s = $stmt->get_result()->fetch_assoc()['cnt'];
+
+  
+    $stmt = $mysqli->prepare("
+      SELECT COUNT(*) AS cnt
+      FROM likes l
+      JOIN posts p ON l.post_id = p.post_id
+      WHERE p.user_id = ?
+        AND l.created_at > IFNULL(
+          (SELECT last_seen_likes FROM users WHERE user_id = ?),
+          '1970-01-01'
+        )
+    ");
+    $stmt->bind_param("ii",$uid,$uid);
+    $stmt->execute();
+    $lk = $stmt->get_result()->fetch_assoc()['cnt'];
     ?>
 
- 
     <div class="dropdown">
       <a href="#" onclick="toggleDropdown('mentions', this);return false;">
-  🔔 Mentions <span class="badge"><?= $m ?></span>
-    </a>
+        🔔 Mentions <span class="badge"><?= $m ?></span>
+      </a>
       <div id="mentions" class="dd-menu">
         <?php
         $stmt = $mysqli->prepare("
@@ -103,7 +116,6 @@ a {text-decoration:none; color:#0366d6;}
           ORDER BY p.created_at DESC
           LIMIT 10
         ");
-
         $stmt->bind_param("sii",$like,$uid,$uid);
         $stmt->execute();
         $r = $stmt->get_result();
@@ -118,11 +130,11 @@ a {text-decoration:none; color:#0366d6;}
       </div>
     </div>
 
+ 
     <div class="dropdown">
       <a href="#" onclick="toggleDropdown('shares', this);return false;">
-      🔁 Shares <span class="badge"><?= $s ?></span>
+        🔁 Shares <span class="badge"><?= $s ?></span>
       </a>
-
       <div id="shares" class="dd-menu">
         <?php
         $stmt = $mysqli->prepare("
@@ -144,6 +156,40 @@ a {text-decoration:none; color:#0366d6;}
         while ($row = $r->fetch_assoc()) {
             echo "<div class='dd-item'>
               🔁 <b>".htmlspecialchars($row['username'])."</b> shared:<br>
+              ".htmlspecialchars($row['content'])."<br>
+              <small>{$row['created_at']}</small>
+            </div>";
+        }
+        ?>
+      </div>
+    </div>
+
+
+    <div class="dropdown">
+      <a href="#" onclick="toggleDropdown('likes', this);return false;">
+        ❤️ Likes <span class="badge"><?= $lk ?></span>
+      </a>
+      <div id="likes" class="dd-menu">
+        <?php
+        $stmt = $mysqli->prepare("
+          SELECT u.username AS username, p.content AS content, l.created_at AS created_at
+          FROM likes l
+          JOIN posts p ON l.post_id = p.post_id
+          JOIN users u ON l.user_id = u.user_id
+          WHERE p.user_id = ?
+            AND l.created_at > IFNULL(
+              (SELECT last_seen_likes FROM users WHERE user_id = ?),
+              '1970-01-01'
+            )
+          ORDER BY l.created_at DESC
+          LIMIT 10
+        ");
+        $stmt->bind_param("ii",$uid,$uid);
+        $stmt->execute();
+        $r = $stmt->get_result();
+        while ($row = $r->fetch_assoc()) {
+            echo "<div class='dd-item'>
+              ❤️ <b>".htmlspecialchars($row['username'])."</b> liked:<br>
               ".htmlspecialchars($row['content'])."<br>
               <small>{$row['created_at']}</small>
             </div>";
@@ -235,9 +281,98 @@ function toggleDropdown(id, el) {
   }
 }
 
-
 function markSeen(type) {
   fetch("mark_seen.php?type=" + type);
+}
+
+function editPost(postId, currentContent) {
+  let contentDiv = document.querySelector('.post-content-' + postId);
+  let form = document.createElement('form');
+  form.onsubmit = function(e) {
+    e.preventDefault();
+    savePost(postId);
+  };
+  
+  let textarea = document.createElement('textarea');
+  textarea.id = 'edit-' + postId;
+  textarea.value = currentContent;
+  textarea.style.width = '100%';
+  textarea.style.minHeight = '60px';
+  textarea.maxLength = 144;
+  
+  let btnSave = document.createElement('button');
+  btnSave.textContent = 'Tallenna';
+  btnSave.type = 'submit';
+  
+  let btnCancel = document.createElement('button');
+  btnCancel.textContent = 'Peruuta';
+  btnCancel.type = 'button';
+  btnCancel.onclick = function() {
+    location.reload();
+  };
+  
+  form.appendChild(textarea);
+  form.appendChild(document.createElement('br'));
+  form.appendChild(btnSave);
+  form.appendChild(document.createTextNode(' '));
+  form.appendChild(btnCancel);
+  
+  contentDiv.innerHTML = '';
+  contentDiv.appendChild(form);
+  textarea.focus();
+}
+
+function savePost(postId) {
+  let textarea = document.getElementById('edit-' + postId);
+  let content = textarea.value;
+  
+  let formData = new FormData();
+  formData.append('post_id', postId);
+  formData.append('content', content);
+  
+  fetch('edit_post.php', {
+    method: 'POST',
+    body: formData
+  })
+  .then(response => {
+    if (response.ok) {
+      location.reload();
+    } else {
+      alert('Virhe tallennuksessa');
+    }
+  })
+  .catch(err => {
+    alert('Virhe: ' + err);
+  });
+}
+
+function toggleLike(postId, button) {
+  let formData = new FormData();
+  formData.append('post_id', postId);
+  
+  fetch('like.php', {
+    method: 'POST',
+    body: formData
+  })
+  .then(response => response.text())
+  .then(result => {
+    let icon = document.getElementById('like-icon-' + postId);
+    let text = document.getElementById('like-text-' + postId);
+    let count = document.getElementById('like-count-' + postId);
+    
+    if (result === 'liked') {
+      icon.textContent = '❤️';
+      text.textContent = 'Unlike';
+      count.textContent = parseInt(count.textContent) + 1;
+    } else {
+      icon.textContent = '🤍';
+      text.textContent = 'Like';
+      count.textContent = parseInt(count.textContent) - 1;
+    }
+  })
+  .catch(err => {
+    alert('Virhe: ' + err);
+  });
 }
 
 document.addEventListener("click", function(e) {
