@@ -3,8 +3,8 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 03, 2025 at 09:02 AM
--- Server version: 10.4.32-MariaDB
+-- Generation Time: 03.12.2025 klo 10:22
+-- Palvelimen versio: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -24,7 +24,7 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table structure for table `followed_hashtags`
+-- Rakenne taululle `followed_hashtags`
 --
 
 CREATE TABLE `followed_hashtags` (
@@ -37,7 +37,7 @@ CREATE TABLE `followed_hashtags` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `follows`
+-- Rakenne taululle `follows`
 --
 
 CREATE TABLE `follows` (
@@ -48,7 +48,7 @@ CREATE TABLE `follows` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `follows`
+-- Vedos taulusta `follows`
 --
 
 INSERT INTO `follows` (`follow_id`, `follower_id`, `following_id`, `created_at`) VALUES
@@ -59,7 +59,7 @@ INSERT INTO `follows` (`follow_id`, `follower_id`, `following_id`, `created_at`)
 -- --------------------------------------------------------
 
 --
--- Table structure for table `hashtags`
+-- Rakenne taululle `hashtags`
 --
 
 CREATE TABLE `hashtags` (
@@ -68,7 +68,7 @@ CREATE TABLE `hashtags` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `hashtags`
+-- Vedos taulusta `hashtags`
 --
 
 INSERT INTO `hashtags` (`hashtag_id`, `tag_name`) VALUES
@@ -80,7 +80,7 @@ INSERT INTO `hashtags` (`hashtag_id`, `tag_name`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `mentions`
+-- Rakenne taululle `mentions`
 --
 
 CREATE TABLE `mentions` (
@@ -92,7 +92,7 @@ CREATE TABLE `mentions` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `posts`
+-- Rakenne taululle `posts`
 --
 
 CREATE TABLE `posts` (
@@ -103,7 +103,7 @@ CREATE TABLE `posts` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `posts`
+-- Vedos taulusta `posts`
 --
 
 INSERT INTO `posts` (`post_id`, `user_id`, `content`, `created_at`) VALUES
@@ -114,7 +114,7 @@ INSERT INTO `posts` (`post_id`, `user_id`, `content`, `created_at`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `post_hashtags`
+-- Rakenne taululle `post_hashtags`
 --
 
 CREATE TABLE `post_hashtags` (
@@ -126,7 +126,20 @@ CREATE TABLE `post_hashtags` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `users`
+-- Rakenne taululle `reposts`
+--
+
+CREATE TABLE `reposts` (
+  `repost_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `post_id` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Rakenne taululle `users`
 --
 
 CREATE TABLE `users` (
@@ -140,7 +153,7 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `users`
+-- Vedos taulusta `users`
 --
 
 INSERT INTO `users` (`user_id`, `username`, `email`, `password_hash`, `bio`, `profile_picture_url`, `created_at`) VALUES
@@ -202,6 +215,14 @@ ALTER TABLE `post_hashtags`
   ADD KEY `hashtag_id` (`hashtag_id`);
 
 --
+-- Indexes for table `reposts`
+--
+ALTER TABLE `reposts`
+  ADD PRIMARY KEY (`repost_id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `post_id` (`post_id`);
+
+--
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
@@ -250,48 +271,61 @@ ALTER TABLE `post_hashtags`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `reposts`
+--
+ALTER TABLE `reposts`
+  MODIFY `repost_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
   MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- Constraints for dumped tables
+-- Rajoitteet vedostauluille
 --
 
 --
--- Constraints for table `followed_hashtags`
+-- Rajoitteet taululle `followed_hashtags`
 --
 ALTER TABLE `followed_hashtags`
   ADD CONSTRAINT `followed_hashtags_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `followed_hashtags_ibfk_2` FOREIGN KEY (`hashtag_id`) REFERENCES `hashtags` (`hashtag_id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `follows`
+-- Rajoitteet taululle `follows`
 --
 ALTER TABLE `follows`
   ADD CONSTRAINT `follows_ibfk_1` FOREIGN KEY (`follower_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `follows_ibfk_2` FOREIGN KEY (`following_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `mentions`
+-- Rajoitteet taululle `mentions`
 --
 ALTER TABLE `mentions`
   ADD CONSTRAINT `mentions_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `posts` (`post_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `mentions_ibfk_2` FOREIGN KEY (`mentioned_user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `posts`
+-- Rajoitteet taululle `posts`
 --
 ALTER TABLE `posts`
   ADD CONSTRAINT `posts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `post_hashtags`
+-- Rajoitteet taululle `post_hashtags`
 --
 ALTER TABLE `post_hashtags`
   ADD CONSTRAINT `post_hashtags_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `posts` (`post_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `post_hashtags_ibfk_2` FOREIGN KEY (`hashtag_id`) REFERENCES `hashtags` (`hashtag_id`) ON DELETE CASCADE;
+
+--
+-- Rajoitteet taululle `reposts`
+--
+ALTER TABLE `reposts`
+  ADD CONSTRAINT `reposts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `reposts_ibfk_2` FOREIGN KEY (`post_id`) REFERENCES `posts` (`post_id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
