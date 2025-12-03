@@ -3,8 +3,8 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: 03.12.2025 klo 11:06
--- Palvelimen versio: 10.4.32-MariaDB
+-- Generation Time: Dec 03, 2025 at 01:36 PM
+-- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -24,7 +24,7 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Rakenne taululle `followed_hashtags`
+-- Table structure for table `followed_hashtags`
 --
 
 CREATE TABLE `followed_hashtags` (
@@ -37,7 +37,7 @@ CREATE TABLE `followed_hashtags` (
 -- --------------------------------------------------------
 
 --
--- Rakenne taululle `follows`
+-- Table structure for table `follows`
 --
 
 CREATE TABLE `follows` (
@@ -48,7 +48,7 @@ CREATE TABLE `follows` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Vedos taulusta `follows`
+-- Dumping data for table `follows`
 --
 
 INSERT INTO `follows` (`follow_id`, `follower_id`, `following_id`, `created_at`) VALUES
@@ -59,7 +59,7 @@ INSERT INTO `follows` (`follow_id`, `follower_id`, `following_id`, `created_at`)
 -- --------------------------------------------------------
 
 --
--- Rakenne taululle `hashtags`
+-- Table structure for table `hashtags`
 --
 
 CREATE TABLE `hashtags` (
@@ -68,7 +68,7 @@ CREATE TABLE `hashtags` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Vedos taulusta `hashtags`
+-- Dumping data for table `hashtags`
 --
 
 INSERT INTO `hashtags` (`hashtag_id`, `tag_name`) VALUES
@@ -80,7 +80,7 @@ INSERT INTO `hashtags` (`hashtag_id`, `tag_name`) VALUES
 -- --------------------------------------------------------
 
 --
--- Rakenne taululle `mentions`
+-- Table structure for table `mentions`
 --
 
 CREATE TABLE `mentions` (
@@ -89,10 +89,17 @@ CREATE TABLE `mentions` (
   `mentioned_user_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `mentions`
+--
+
+INSERT INTO `mentions` (`mention_id`, `post_id`, `mentioned_user_id`) VALUES
+(1, 7, 4);
+
 -- --------------------------------------------------------
 
 --
--- Rakenne taululle `posts`
+-- Table structure for table `posts`
 --
 
 CREATE TABLE `posts` (
@@ -103,19 +110,21 @@ CREATE TABLE `posts` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Vedos taulusta `posts`
+-- Dumping data for table `posts`
 --
 
 INSERT INTO `posts` (`post_id`, `user_id`, `content`, `created_at`) VALUES
 (1, 1, 'Moi kaikki! Tämä on ensimmäinen viestini #aloitus', '2025-12-02 08:49:54'),
 (2, 1, 'Koodausta ja kahvia #ohjelmointi #kahvi', '2025-12-02 08:49:54'),
 (3, 2, 'Rakkautta musiikkiin! @matti tule kuuntelemaan #musiikki', '2025-12-02 08:49:54'),
-(5, 4, 'Testiä #ohjelmointi', '2025-12-03 10:01:08');
+(5, 4, 'Testiä #ohjelmointi', '2025-12-03 10:01:08'),
+(6, 5, 'Tarvitsen lisää kahvia #kahvi #ohjelmointi', '2025-12-03 10:17:21'),
+(7, 5, '@Vesku moi', '2025-12-03 10:59:58');
 
 -- --------------------------------------------------------
 
 --
--- Rakenne taululle `post_hashtags`
+-- Table structure for table `post_hashtags`
 --
 
 CREATE TABLE `post_hashtags` (
@@ -125,7 +134,7 @@ CREATE TABLE `post_hashtags` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Vedos taulusta `post_hashtags`
+-- Dumping data for table `post_hashtags`
 --
 
 INSERT INTO `post_hashtags` (`id`, `post_id`, `hashtag_id`) VALUES
@@ -133,12 +142,14 @@ INSERT INTO `post_hashtags` (`id`, `post_id`, `hashtag_id`) VALUES
 (3, 2, 2),
 (4, 2, 3),
 (5, 3, 4),
-(1, 5, 2);
+(1, 5, 2),
+(8, 6, 2),
+(7, 6, 3);
 
 -- --------------------------------------------------------
 
 --
--- Rakenne taululle `reposts`
+-- Table structure for table `reposts`
 --
 
 CREATE TABLE `reposts` (
@@ -148,10 +159,20 @@ CREATE TABLE `reposts` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `reposts`
+--
+
+INSERT INTO `reposts` (`repost_id`, `user_id`, `post_id`, `created_at`) VALUES
+(1, 5, 2, '2025-12-03 10:16:48'),
+(2, 5, 2, '2025-12-03 10:16:51'),
+(3, 5, 2, '2025-12-03 10:16:52'),
+(4, 5, 2, '2025-12-03 10:16:53');
+
 -- --------------------------------------------------------
 
 --
--- Rakenne taululle `users`
+-- Table structure for table `users`
 --
 
 CREATE TABLE `users` (
@@ -165,14 +186,15 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Vedos taulusta `users`
+-- Dumping data for table `users`
 --
 
 INSERT INTO `users` (`user_id`, `username`, `email`, `password_hash`, `bio`, `profile_picture_url`, `created_at`) VALUES
 (1, 'matti', 'matti@example.com', 'hash123', 'Koodari Salosta', NULL, '2025-12-02 08:49:54'),
 (2, 'liisa', 'liisa@example.com', 'hash456', 'Musiikin ystävä', NULL, '2025-12-02 08:49:54'),
 (3, 'pekka', 'pekka@example.com', 'hash789', 'Ruoka ja matkailu', NULL, '2025-12-02 08:49:54'),
-(4, 'Vesku', 'weex77@gmail.com', '$2y$10$mXuS2yfV6awrmP5cmNZr0eDjreJemJoKClDqdXidhRuguNsyGr8sC', NULL, NULL, '2025-12-03 10:00:45');
+(4, 'Vesku', 'weex77@gmail.com', '$2y$10$mXuS2yfV6awrmP5cmNZr0eDjreJemJoKClDqdXidhRuguNsyGr8sC', NULL, NULL, '2025-12-03 10:00:45'),
+(5, 'Jenni', 'jm5206@edu.turku.fi', '$2y$10$W8fVdFzED3tsFjb2ToemK.NQxjj7BovSYFGvkwHXnsrf49HahYFGq', 'Testing...', 'uploads/pfp_5_1764764848.png', '2025-12-03 10:14:31');
 
 --
 -- Indexes for dumped tables
@@ -269,72 +291,72 @@ ALTER TABLE `hashtags`
 -- AUTO_INCREMENT for table `mentions`
 --
 ALTER TABLE `mentions`
-  MODIFY `mention_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `mention_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `posts`
 --
 ALTER TABLE `posts`
-  MODIFY `post_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `post_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `post_hashtags`
 --
 ALTER TABLE `post_hashtags`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `reposts`
 --
 ALTER TABLE `reposts`
-  MODIFY `repost_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `repost_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- Rajoitteet vedostauluille
+-- Constraints for dumped tables
 --
 
 --
--- Rajoitteet taululle `followed_hashtags`
+-- Constraints for table `followed_hashtags`
 --
 ALTER TABLE `followed_hashtags`
   ADD CONSTRAINT `followed_hashtags_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `followed_hashtags_ibfk_2` FOREIGN KEY (`hashtag_id`) REFERENCES `hashtags` (`hashtag_id`) ON DELETE CASCADE;
 
 --
--- Rajoitteet taululle `follows`
+-- Constraints for table `follows`
 --
 ALTER TABLE `follows`
   ADD CONSTRAINT `follows_ibfk_1` FOREIGN KEY (`follower_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `follows_ibfk_2` FOREIGN KEY (`following_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
 
 --
--- Rajoitteet taululle `mentions`
+-- Constraints for table `mentions`
 --
 ALTER TABLE `mentions`
   ADD CONSTRAINT `mentions_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `posts` (`post_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `mentions_ibfk_2` FOREIGN KEY (`mentioned_user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
 
 --
--- Rajoitteet taululle `posts`
+-- Constraints for table `posts`
 --
 ALTER TABLE `posts`
   ADD CONSTRAINT `posts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
 
 --
--- Rajoitteet taululle `post_hashtags`
+-- Constraints for table `post_hashtags`
 --
 ALTER TABLE `post_hashtags`
   ADD CONSTRAINT `post_hashtags_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `posts` (`post_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `post_hashtags_ibfk_2` FOREIGN KEY (`hashtag_id`) REFERENCES `hashtags` (`hashtag_id`) ON DELETE CASCADE;
 
 --
--- Rajoitteet taululle `reposts`
+-- Constraints for table `reposts`
 --
 ALTER TABLE `reposts`
   ADD CONSTRAINT `reposts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
