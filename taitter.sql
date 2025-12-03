@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: 03.12.2025 klo 10:22
+-- Generation Time: 03.12.2025 klo 11:06
 -- Palvelimen versio: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -109,7 +109,8 @@ CREATE TABLE `posts` (
 INSERT INTO `posts` (`post_id`, `user_id`, `content`, `created_at`) VALUES
 (1, 1, 'Moi kaikki! Tämä on ensimmäinen viestini #aloitus', '2025-12-02 08:49:54'),
 (2, 1, 'Koodausta ja kahvia #ohjelmointi #kahvi', '2025-12-02 08:49:54'),
-(3, 2, 'Rakkautta musiikkiin! @matti tule kuuntelemaan #musiikki', '2025-12-02 08:49:54');
+(3, 2, 'Rakkautta musiikkiin! @matti tule kuuntelemaan #musiikki', '2025-12-02 08:49:54'),
+(5, 4, 'Testiä #ohjelmointi', '2025-12-03 10:01:08');
 
 -- --------------------------------------------------------
 
@@ -122,6 +123,17 @@ CREATE TABLE `post_hashtags` (
   `post_id` int(11) NOT NULL,
   `hashtag_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Vedos taulusta `post_hashtags`
+--
+
+INSERT INTO `post_hashtags` (`id`, `post_id`, `hashtag_id`) VALUES
+(2, 1, 1),
+(3, 2, 2),
+(4, 2, 3),
+(5, 3, 4),
+(1, 5, 2);
 
 -- --------------------------------------------------------
 
@@ -159,7 +171,8 @@ CREATE TABLE `users` (
 INSERT INTO `users` (`user_id`, `username`, `email`, `password_hash`, `bio`, `profile_picture_url`, `created_at`) VALUES
 (1, 'matti', 'matti@example.com', 'hash123', 'Koodari Salosta', NULL, '2025-12-02 08:49:54'),
 (2, 'liisa', 'liisa@example.com', 'hash456', 'Musiikin ystävä', NULL, '2025-12-02 08:49:54'),
-(3, 'pekka', 'pekka@example.com', 'hash789', 'Ruoka ja matkailu', NULL, '2025-12-02 08:49:54');
+(3, 'pekka', 'pekka@example.com', 'hash789', 'Ruoka ja matkailu', NULL, '2025-12-02 08:49:54'),
+(4, 'Vesku', 'weex77@gmail.com', '$2y$10$mXuS2yfV6awrmP5cmNZr0eDjreJemJoKClDqdXidhRuguNsyGr8sC', NULL, NULL, '2025-12-03 10:00:45');
 
 --
 -- Indexes for dumped tables
@@ -262,13 +275,13 @@ ALTER TABLE `mentions`
 -- AUTO_INCREMENT for table `posts`
 --
 ALTER TABLE `posts`
-  MODIFY `post_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `post_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `post_hashtags`
 --
 ALTER TABLE `post_hashtags`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `reposts`
@@ -280,7 +293,7 @@ ALTER TABLE `reposts`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- Rajoitteet vedostauluille

@@ -61,7 +61,15 @@ a {text-decoration:none; color:#0366d6;}
     <div class="card">
       <h4>Trending hashtags</h4>
       <?php
-      $q = "SELECT h.tag_name, COUNT(ph.hashtag_id) AS cnt FROM post_hashtags ph JOIN hashtags h ON ph.hashtag_id = h.hashtag_id GROUP BY h.tag_name ORDER BY cnt DESC LIMIT 10";
+      $q = "SELECT h.tag_name, COUNT(*) AS cnt
+      FROM post_hashtags ph
+      INNER JOIN hashtags h ON ph.hashtag_id = h.hashtag_id
+      WHERE h.tag_name <> ''
+      GROUP BY h.tag_name
+      HAVING cnt > 0
+      ORDER BY cnt DESC
+      LIMIT 10";
+
       $r = $mysqli->query($q);
       while ($row = $r->fetch_assoc()) {
           echo '<div><a href="index.php?hashtag='.urlencode($row['tag_name']).'">#'.htmlspecialchars($row['tag_name'])."</a> ({$row['cnt']})</div>";
