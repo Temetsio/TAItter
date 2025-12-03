@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 03, 2025 at 01:36 PM
+-- Generation Time: Dec 03, 2025 at 02:18 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -165,9 +165,7 @@ CREATE TABLE `reposts` (
 
 INSERT INTO `reposts` (`repost_id`, `user_id`, `post_id`, `created_at`) VALUES
 (1, 5, 2, '2025-12-03 10:16:48'),
-(2, 5, 2, '2025-12-03 10:16:51'),
-(3, 5, 2, '2025-12-03 10:16:52'),
-(4, 5, 2, '2025-12-03 10:16:53');
+(6, 5, 6, '2025-12-03 13:16:09');
 
 -- --------------------------------------------------------
 
@@ -291,13 +289,13 @@ ALTER TABLE `hashtags`
 -- AUTO_INCREMENT for table `mentions`
 --
 ALTER TABLE `mentions`
-  MODIFY `mention_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `mention_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `posts`
 --
 ALTER TABLE `posts`
-  MODIFY `post_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `post_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `post_hashtags`
@@ -309,7 +307,7 @@ ALTER TABLE `post_hashtags`
 -- AUTO_INCREMENT for table `reposts`
 --
 ALTER TABLE `reposts`
-  MODIFY `repost_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `repost_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `users`
