@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 02, 2025 at 09:50 AM
+-- Generation Time: Dec 03, 2025 at 09:02 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -76,19 +76,6 @@ INSERT INTO `hashtags` (`hashtag_id`, `tag_name`) VALUES
 (3, 'kahvi'),
 (4, 'musiikki'),
 (2, 'ohjelmointi');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `liked_users`
---
-
-CREATE TABLE `liked_users` (
-  `id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `liked_user_id` int(11) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -191,14 +178,6 @@ ALTER TABLE `hashtags`
   ADD KEY `idx_hashtags_tag_name` (`tag_name`);
 
 --
--- Indexes for table `liked_users`
---
-ALTER TABLE `liked_users`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `user_id` (`user_id`,`liked_user_id`),
-  ADD KEY `liked_user_id` (`liked_user_id`);
-
---
 -- Indexes for table `mentions`
 --
 ALTER TABLE `mentions`
@@ -253,12 +232,6 @@ ALTER TABLE `hashtags`
   MODIFY `hashtag_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
--- AUTO_INCREMENT for table `liked_users`
---
-ALTER TABLE `liked_users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT for table `mentions`
 --
 ALTER TABLE `mentions`
@@ -299,13 +272,6 @@ ALTER TABLE `followed_hashtags`
 ALTER TABLE `follows`
   ADD CONSTRAINT `follows_ibfk_1` FOREIGN KEY (`follower_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `follows_ibfk_2` FOREIGN KEY (`following_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
-
---
--- Constraints for table `liked_users`
---
-ALTER TABLE `liked_users`
-  ADD CONSTRAINT `liked_users_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `liked_users_ibfk_2` FOREIGN KEY (`liked_user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `mentions`
