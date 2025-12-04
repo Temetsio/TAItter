@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 03, 2025 at 07:35 PM
+-- Generation Time: Dec 04, 2025 at 07:08 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -54,7 +54,8 @@ CREATE TABLE `follows` (
 INSERT INTO `follows` (`follow_id`, `follower_id`, `following_id`, `created_at`) VALUES
 (1, 1, 2, '2025-12-02 08:49:54'),
 (2, 2, 1, '2025-12-02 08:49:54'),
-(3, 3, 1, '2025-12-02 08:49:54');
+(3, 3, 1, '2025-12-02 08:49:54'),
+(4, 5, 4, '2025-12-04 06:02:28');
 
 -- --------------------------------------------------------
 
@@ -301,7 +302,7 @@ ALTER TABLE `followed_hashtags`
 -- AUTO_INCREMENT for table `follows`
 --
 ALTER TABLE `follows`
-  MODIFY `follow_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `follow_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `hashtags`
@@ -313,7 +314,7 @@ ALTER TABLE `hashtags`
 -- AUTO_INCREMENT for table `likes`
 --
 ALTER TABLE `likes`
-  MODIFY `like_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
+  MODIFY `like_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
 
 --
 -- AUTO_INCREMENT for table `mentions`
