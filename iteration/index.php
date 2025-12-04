@@ -67,7 +67,7 @@ a {text-decoration:none; color:#0366d6;}
     $stmt->execute();
     $m = $stmt->get_result()->fetch_assoc()['cnt'];
 
-
+  
     $stmt = $mysqli->prepare("
       SELECT COUNT(*) AS cnt
       FROM reposts r
@@ -81,6 +81,7 @@ a {text-decoration:none; color:#0366d6;}
     $stmt->bind_param("ii",$uid,$uid);
     $stmt->execute();
     $s = $stmt->get_result()->fetch_assoc()['cnt'];
+
 
     $stmt = $mysqli->prepare("
       SELECT COUNT(*) AS cnt
@@ -162,7 +163,6 @@ a {text-decoration:none; color:#0366d6;}
         ?>
       </div>
     </div>
-
 
     <div class="dropdown">
       <a href="#" onclick="toggleDropdown('likes', this);return false;">
@@ -246,6 +246,36 @@ a {text-decoration:none; color:#0366d6;}
   </div>
 
   <div>
+    <?php if ($filterHashtag): ?>
+      <div class="card">
+        <h3>Viewing: #<?= htmlspecialchars($filterHashtag) ?></h3>
+        <?php
+        $stmt = $mysqli->prepare("
+          SELECT COUNT(*) as is_following 
+          FROM followed_hashtags fh
+          JOIN hashtags h ON fh.hashtag_id = h.hashtag_id
+          WHERE fh.user_id = ? AND h.tag_name = ?
+        ");
+        $stmt->bind_param("is", $uid, $filterHashtag);
+        $stmt->execute();
+        $isFollowingHashtag = $stmt->get_result()->fetch_assoc()['is_following'] > 0;
+        
+        if ($isFollowingHashtag): ?>
+          <form method="post" action="follow_hashtag.php" style="margin-top:8px;">
+            <input type="hidden" name="hashtag" value="<?= htmlspecialchars($filterHashtag) ?>">
+            <input type="hidden" name="action" value="unfollow">
+            <button type="submit">Unfollow #<?= htmlspecialchars($filterHashtag) ?></button>
+          </form>
+        <?php else: ?>
+          <form method="post" action="follow_hashtag.php" style="margin-top:8px;">
+            <input type="hidden" name="hashtag" value="<?= htmlspecialchars($filterHashtag) ?>">
+            <input type="hidden" name="action" value="follow">
+            <button type="submit">Follow #<?= htmlspecialchars($filterHashtag) ?></button>
+          </form>
+        <?php endif; ?>
+      </div>
+    <?php endif; ?>
+    
     <div class="card">
       <form method="post" action="post.php">
         <textarea name="content" maxlength="144" placeholder="What's happening?"></textarea><br>
