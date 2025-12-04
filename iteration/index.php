@@ -831,7 +831,7 @@ function toggleDropdown(id, el) {
   if (open) {
     markSeen(id);
     let badge = el.querySelector('.badge');
-    if(badge) badge.textContent = '0';
+    if (badge) badge.textContent = '0';
   }
 }
 
@@ -839,6 +839,28 @@ function markSeen(type) {
   fetch("mark_seen.php?type=" + type);
 }
 
+// ✅ DELETE POST (GLOBAL)
+function deletePost(postId) {
+  if (!confirm("Haluatko varmasti poistaa tämän postauksen?")) return;
+
+  fetch("delete_post.php", {
+    method: "POST",
+    headers: {"Content-Type": "application/x-www-form-urlencoded"},
+    body: "post_id=" + encodeURIComponent(postId)
+  })
+  .then(res => res.text())
+  .then(r => {
+    if (r.trim() === "OK") {
+      let el = document.getElementById("post-" + postId);
+      if (el) el.remove();
+    } else {
+      alert("Poisto epäonnistui: " + r);
+    }
+  })
+  .catch(err => alert("Virhe: " + err));
+}
+
+// ✅ EDIT POST
 function editPost(postId, currentContent) {
   let contentDiv = document.querySelector('.post-content-' + postId);
   let form = document.createElement('form');
@@ -846,125 +868,87 @@ function editPost(postId, currentContent) {
     e.preventDefault();
     savePost(postId);
   };
-  
+
   let textarea = document.createElement('textarea');
   textarea.id = 'edit-' + postId;
   textarea.value = currentContent;
   textarea.style.width = '100%';
   textarea.style.minHeight = '60px';
   textarea.maxLength = 144;
-  
+
   let btnSave = document.createElement('button');
   btnSave.textContent = 'Tallenna';
   btnSave.type = 'submit';
-  
+
   let btnCancel = document.createElement('button');
   btnCancel.textContent = 'Peruuta';
   btnCancel.type = 'button';
-  btnCancel.onclick = function() {
-    location.reload();
-  };
-  
+  btnCancel.onclick = () => location.reload();
+
   form.appendChild(textarea);
   form.appendChild(document.createElement('br'));
   form.appendChild(btnSave);
   form.appendChild(document.createTextNode(' '));
   form.appendChild(btnCancel);
-  
+
   contentDiv.innerHTML = '';
   contentDiv.appendChild(form);
   textarea.focus();
 }
 
+// ✅ SAVE POST
 function savePost(postId) {
   let textarea = document.getElementById('edit-' + postId);
   let content = textarea.value;
-  
+
   let formData = new FormData();
   formData.append('post_id', postId);
   formData.append('content', content);
-  
-  fetch('edit_post.php', {
-    method: 'POST',
-    body: formData
-  })
-  .then(response => {
-    if (response.ok) {
-      location.reload();
-    } else {
-      alert('Virhe tallennuksessa');
-    }
-  })
-  .catch(err => {
-    alert('Virhe: ' + err);
-  });
+
+  fetch('edit_post.php', { method: 'POST', body: formData })
+  .then(r => r.ok ? location.reload() : alert('Virhe tallennuksessa'))
+  .catch(err => alert('Virhe: ' + err));
 }
 
+// ✅ LIKE
 function toggleLike(postId, button, uniqueCardId) {
-  console.log('toggleLike called for post:', postId, 'uniqueCardId:', uniqueCardId);
-  
   let formData = new FormData();
   formData.append('post_id', postId);
-  
-  fetch('like.php', {
-    method: 'POST',
-    body: formData
-  })
-  .then(response => {
-    console.log('Response status:', response.status);
-    return response.json();
-  })
+
+  fetch('like.php', {method: 'POST', body: formData})
+  .then(res => res.json())
   .then(data => {
-    console.log('Response data:', data);
-    
-    if (!data.success) {
-      alert('Virhe: ' + (data.error || 'Tuntematon virhe'));
-      return;
-    }
-    
+    if (!data.success) return alert(data.error || 'Virhe');
+
     let icon = document.getElementById('like-icon-' + uniqueCardId);
     let text = document.getElementById('like-text-' + uniqueCardId);
     let count = document.getElementById('like-count-' + uniqueCardId);
-    
-    console.log('Elements found:', {icon, text, count});
-    
-    if (icon && text && count) {
-      if (data.action === 'liked') {
-        icon.textContent = '❤️';
-        text.textContent = 'Unlike';
-      } else {
-        icon.textContent = '🤍';
-        text.textContent = 'Like';
-      }
-      count.textContent = data.count;
-      console.log('UI updated successfully');
+
+    if (data.action === 'liked') {
+      icon.textContent = '❤️';
+      text.textContent = 'Unlike';
     } else {
-      console.error('Could not find UI elements for:', uniqueCardId);
+      icon.textContent = '🤍';
+      text.textContent = 'Like';
     }
-  })
-  .catch(err => {
-    console.error('Fetch error:', err);
-    alert('Virhe: ' + err);
+    count.textContent = data.count;
   });
 }
 
+// ✅ RELOAD FEED
 function refreshFeed() {
   fetch('fetch_posts.php?' + new URLSearchParams(window.location.search))
-    .then(response => response.text())
-    .then(html => {
-      document.getElementById('feed').innerHTML = html;
-    })
-    .catch(err => {
-      console.error('Virhe feedin päivityksessä:', err);
-    });
+    .then(res => res.text())
+    .then(html => document.getElementById('feed').innerHTML = html);
 }
 
+// ✅ DROPBOX CLICK OUTSIDE
 document.addEventListener("click", function(e) {
   if (!e.target.closest('.dropdown')) {
     document.querySelectorAll('.dd-menu').forEach(el => el.classList.remove('show'));
   }
 });
-</script>
 
+console.log("JS LOADED OK");
+</script>
 </body>
-</html>

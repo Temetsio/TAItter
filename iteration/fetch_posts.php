@@ -1,4 +1,3 @@
-
 <?php
 require_once 'config.php';
 
@@ -53,15 +52,15 @@ if ($hashtag) {
                 r.created_at,
                 p.edited_at,
                 p.user_id,
-                u2.username AS username,
+                u2.username,
                 u2.profile_picture_url,
                 u.username AS reposted_by,
                 (SELECT COUNT(*) FROM likes WHERE post_id = p.post_id) AS like_count,
                 EXISTS(SELECT 1 FROM likes WHERE post_id = p.post_id AND user_id = ?) AS user_has_liked
             FROM reposts r
             JOIN posts p ON r.post_id = p.post_id
-            JOIN users u ON r.user_id = u.user_id      -- who reposted
-            JOIN users u2 ON p.user_id = u2.user_id    -- original author
+            JOIN users u ON r.user_id = u.user_id
+            JOIN users u2 ON p.user_id = u2.user_id
         )
         ORDER BY created_at DESC
         LIMIT 100
@@ -80,8 +79,8 @@ while ($row = $res->fetch_assoc()) {
     $content = preg_replace('/@([A-Za-z0-9_]+)/', '<a href="profile.php?u=$1">@$1</a>', $content);
 
     $isOwnPost = ($row['user_id'] == $currentUserId);
-    $editedLabel = $row['edited_at'] ? '<small style="color:#999;font-style:italic;margin-left:8px;">(muokattu)</small>' : '';
-    
+    $editedLabel = $row['edited_at'] ? '<small style="color:#999;margin-left:6px;">(muokattu)</small>' : '';
+
     $likeIcon = $row['user_has_liked'] ? '❤️' : '🤍';
     $likeText = $row['user_has_liked'] ? 'Unlike' : 'Like';
     $likeCount = $row['like_count'];
@@ -89,38 +88,38 @@ while ($row = $res->fetch_assoc()) {
     echo "<div class='card' id='post-{$row['post_id']}'>";
 
     if ($row['reposted_by']) {
-        echo "<div style='font-size:12px;color:#555;'>🔁 " . 
-             htmlspecialchars($row['reposted_by']) . " reposted</div>";
+        echo "<div style='font-size:12px;color:#555;'>🔁 ".htmlspecialchars($row['reposted_by'])." reposted</div>";
     }
 
     echo "
-        <div class='card-header'>
-            <strong><a href='profile.php?u={$row['username']}'>"
-            . htmlspecialchars($row['username']) .
-            "</a></strong>
-            <small>{$row['created_at']}</small>
-            {$editedLabel}
-        </div>
-        <div class='post-content-{$row['post_id']}'>$content</div>";
-    
+      <div class='card-header'>
+        <strong><a href='profile.php?u={$row['username']}'>".htmlspecialchars($row['username'])."</a></strong>
+        <small>{$row['created_at']}</small> {$editedLabel}
+      </div>
+      <div class='post-content-{$row['post_id']}'>$content</div>
+    ";
+
     if ($isOwnPost) {
         $rawContent = htmlspecialchars(addslashes($row['content']));
-        echo "<div style='margin-top:8px;'>
+        echo "
+        <div style='margin-top:8px;'>
             <button onclick=\"editPost({$row['post_id']}, '{$rawContent}')\">Muokkaa</button>
+            <button onclick=\"deletePost({$row['post_id']})\" style='color:red;margin-left:6px;'>Poista</button>
         </div>";
     }
-    
+
     echo "
-        <div class='card-actions'>
-            <button onclick='toggleLike({$row['post_id']}, this)' id='like-btn-{$row['post_id']}'>
-                <span id='like-icon-{$row['post_id']}'>{$likeIcon}</span>
-                <span id='like-text-{$row['post_id']}'>{$likeText}</span>
-                (<span id='like-count-{$row['post_id']}'>{$likeCount}</span>)
-            </button>
-            <form method='post' action='repost.php' style='display:inline;'>
-                <input type='hidden' name='post_id' value='{$row['post_id']}'>
-                <button>Repost</button>
-            </form>
-        </div>
+      <div class='card-actions'>
+        <button onclick='toggleLike({$row['post_id']}, this)' id='like-btn-{$row['post_id']}'>
+          <span id='like-icon-{$row['post_id']}'>{$likeIcon}</span>
+          <span id='like-text-{$row['post_id']}'>{$likeText}</span>
+          (<span id='like-count-{$row['post_id']}'>{$likeCount}</span>)
+        </button>
+
+        <form method='post' action='repost.php' style='display:inline;'>
+          <input type='hidden' name='post_id' value='{$row['post_id']}'>
+          <button>Repost</button>
+        </form>
+      </div>
     </div>";
 }
