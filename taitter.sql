@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 04, 2025 at 07:08 AM
+-- Generation Time: Dec 04, 2025 at 08:00 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -33,6 +33,13 @@ CREATE TABLE `followed_hashtags` (
   `hashtag_id` int(11) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `followed_hashtags`
+--
+
+INSERT INTO `followed_hashtags` (`id`, `user_id`, `hashtag_id`, `created_at`) VALUES
+(1, 5, 3, '2025-12-04 07:00:27');
 
 -- --------------------------------------------------------
 
@@ -296,7 +303,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `followed_hashtags`
 --
 ALTER TABLE `followed_hashtags`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `follows`
@@ -308,7 +315,7 @@ ALTER TABLE `follows`
 -- AUTO_INCREMENT for table `hashtags`
 --
 ALTER TABLE `hashtags`
-  MODIFY `hashtag_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `hashtag_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `likes`
