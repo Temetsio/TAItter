@@ -16,6 +16,39 @@ if (!$row) {
     echo "User not found";
     exit;
 }
+
+$isFollowing = false;
+$viewerIsOwner = false;
+
+if (current_user_id()) {
+    $viewerIsOwner = (current_user_id() == $row['user_id']);
+    
+    if (!$viewerIsOwner) {
+        $stmt = $mysqli->prepare("
+            SELECT COUNT(*) as is_following 
+            FROM follows 
+            WHERE follower_id = ? AND following_id = ?
+        ");
+        $currentUserId = current_user_id();
+        $profileUserId = $row['user_id'];
+        $stmt->bind_param("ii", $currentUserId, $profileUserId);
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_assoc();
+        $isFollowing = $result['is_following'] > 0;
+    }
+}
+
+$profileUserId = $row['user_id'];
+
+$stmt = $mysqli->prepare("SELECT COUNT(*) as cnt FROM follows WHERE following_id = ?");
+$stmt->bind_param("i", $profileUserId);
+$stmt->execute();
+$followersCount = $stmt->get_result()->fetch_assoc()['cnt'];
+
+$stmt = $mysqli->prepare("SELECT COUNT(*) as cnt FROM follows WHERE follower_id = ?");
+$stmt->bind_param("i", $profileUserId);
+$stmt->execute();
+$followingCount = $stmt->get_result()->fetch_assoc()['cnt'];
 ?>
 <!doctype html>
 <html lang="en">
@@ -64,7 +97,6 @@ body {
     gap: 16px;
 }
 
-/* Card */
 .card {
     background: var(--bg-card);
     backdrop-filter: blur(18px);
@@ -91,7 +123,6 @@ body {
     z-index: 1;
 }
 
-/* Topbar */
 .topbar {
     display: flex;
     align-items: center;
@@ -141,7 +172,6 @@ body {
     flex-wrap: wrap;
 }
 
-/* Links & buttons */
 a {
     color: var(--accent-dark);
     text-decoration: none;
@@ -172,7 +202,49 @@ a:hover {
     transform: translateY(-1px);
 }
 
-/* Profile header */
+.btn-primary {
+    border-radius: 999px;
+    border: none;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    padding: 8px 16px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: transform 0.08s, box-shadow 0.12s;
+    box-shadow: 0 8px 20px rgba(255, 111, 181, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(255, 111, 181, 0.4);
+}
+
+.btn-secondary {
+    border-radius: 999px;
+    border: 1.5px solid var(--accent);
+    background: rgba(255,255,255,0.9);
+    padding: 7px 14px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--accent-dark);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.12s, transform 0.08s;
+}
+
+.btn-secondary:hover {
+    background: var(--accent-soft);
+    transform: translateY(-1px);
+}
+
 .profile-header {
     display: flex;
     gap: 18px;
@@ -225,9 +297,31 @@ a:hover {
     color: var(--text-soft);
 }
 
+.profile-stats {
+    display: flex;
+    gap: 16px;
+    margin: 8px 0;
+    font-size: 14px;
+}
+
+.profile-stat {
+    display: flex;
+    gap: 4px;
+}
+
+.profile-stat-number {
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.profile-stat-label {
+    color: var(--text-soft);
+}
+
 .profile-meta {
     font-size: 12px;
     color: var(--text-soft);
+    margin-top: 4px;
 }
 
 .profile-bio {
@@ -237,20 +331,18 @@ a:hover {
 }
 
 .profile-actions {
-    margin-top: 10px;
+    margin-top: 12px;
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
 }
 
-/* Section title */
 .section-title {
     margin: 0 0 10px;
     font-size: 18px;
     font-weight: 600;
 }
 
-/* Post list */
 .post-list {
     display: flex;
     flex-direction: column;
@@ -276,7 +368,6 @@ a:hover {
     font-weight: 500;
 }
 
-/* Responsive */
 @media (max-width: 640px) {
     .topbar {
         flex-direction: column;
@@ -293,7 +384,6 @@ a:hover {
 <body>
 <div class="app-shell">
 
-    <!-- Top bar -->
     <div class="card">
         <div class="card-inner topbar">
             <div class="topbar-left">
@@ -305,20 +395,27 @@ a:hover {
             </div>
             <div class="topbar-right">
                 <a href="index.php" class="btn-outline">← Back to feed</a>
-                <a href="logout.php" class="btn-outline">Logout</a>
+                <?php if (current_user_id()): ?>
+                    <a href="logout.php" class="btn-outline">Logout</a>
+                <?php else: ?>
+                    <a href="login.php" class="btn-outline">Login</a>
+                <?php endif; ?>
             </div>
         </div>
     </div>
 
-    <!-- Profile header -->
+
     <div class="card">
         <div class="card-inner profile-header">
             <div class="profile-avatar">
                 <?php if (!empty($row['profile_picture_url'])): ?>
                     <img src="<?= htmlspecialchars($row['profile_picture_url']) ?>" alt="Profile picture">
                 <?php else: ?>
+                    <?php 
+                    $firstChar = substr($row['username'], 0, 1);
+                    ?>
                     <div class="profile-avatar-fallback">
-                        <?= strtoupper(htmlspecialchars(substr($row['username'], 0, 1))) ?>
+                        <?= strtoupper(htmlspecialchars($firstChar)) ?>
                     </div>
                 <?php endif; ?>
             </div>
@@ -326,6 +423,18 @@ a:hover {
             <div class="profile-main">
                 <h1 class="profile-username"><?= htmlspecialchars($row['username']) ?></h1>
                 <div class="profile-handle">@<?= htmlspecialchars($row['username']) ?></div>
+                
+                <div class="profile-stats">
+                    <div class="profile-stat">
+                        <span class="profile-stat-number"><?= $followersCount ?></span>
+                        <span class="profile-stat-label">Followers</span>
+                    </div>
+                    <div class="profile-stat">
+                        <span class="profile-stat-number"><?= $followingCount ?></span>
+                        <span class="profile-stat-label">Following</span>
+                    </div>
+                </div>
+                
                 <div class="profile-meta">
                     Joined <?= htmlspecialchars(date('F j, Y', strtotime($row['created_at']))) ?>
                 </div>
@@ -337,15 +446,28 @@ a:hover {
                 <?php endif; ?>
 
                 <div class="profile-actions">
-                    <?php if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $row['user_id']): ?>
+                    <?php if ($viewerIsOwner): ?>
                         <a href="edit_profile.php" class="btn-outline">Edit profile</a>
+                    <?php elseif (current_user_id()): ?>
+                        <?php if ($isFollowing): ?>
+                            <form method="post" action="follow.php" style="display:inline;">
+                                <input type="hidden" name="username" value="<?= htmlspecialchars($row['username']) ?>">
+                                <input type="hidden" name="action" value="unfollow">
+                                <button type="submit" class="btn-secondary">Unfollow</button>
+                            </form>
+                        <?php else: ?>
+                            <form method="post" action="follow.php" style="display:inline;">
+                                <input type="hidden" name="username" value="<?= htmlspecialchars($row['username']) ?>">
+                                <input type="hidden" name="action" value="follow">
+                                <button type="submit" class="btn-primary">Follow</button>
+                            </form>
+                        <?php endif; ?>
                     <?php endif; ?>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Recent posts -->
     <div class="card">
         <div class="card-inner">
             <h2 class="section-title">Recent posts</h2>
@@ -359,14 +481,12 @@ a:hover {
                 while ($p = $r->fetch_assoc()) {
                     $c = htmlspecialchars($p['content']);
 
-                    // Make hashtags clickable
                     $c = preg_replace(
                         '/#([A-Za-z0-9_åäöÅÄÖ\-]+)/u',
                         '<a href="index.php?hashtag=$1">#$1</a>',
                         $c
                     );
 
-                    // Make mentions clickable
                     $c = preg_replace(
                         '/@([A-Za-z0-9_]+)/',
                         '<a href="profile.php?u=$1">@$1</a>',

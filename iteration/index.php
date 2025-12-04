@@ -67,6 +67,7 @@ a {text-decoration:none; color:#0366d6;}
     $stmt->execute();
     $m = $stmt->get_result()->fetch_assoc()['cnt'];
 
+
     $stmt = $mysqli->prepare("
       SELECT COUNT(*) AS cnt
       FROM reposts r
@@ -81,7 +82,6 @@ a {text-decoration:none; color:#0366d6;}
     $stmt->execute();
     $s = $stmt->get_result()->fetch_assoc()['cnt'];
 
-  
     $stmt = $mysqli->prepare("
       SELECT COUNT(*) AS cnt
       FROM likes l
@@ -130,7 +130,6 @@ a {text-decoration:none; color:#0366d6;}
       </div>
     </div>
 
- 
     <div class="dropdown">
       <a href="#" onclick="toggleDropdown('shares', this);return false;">
         🔁 Shares <span class="badge"><?= $s ?></span>
@@ -217,6 +216,30 @@ a {text-decoration:none; color:#0366d6;}
       $stmt->bind_param('i',$uid); $stmt->execute(); $r=$stmt->get_result();
       while($row=$r->fetch_assoc()){
         echo '<div><a href="index.php?hashtag='.urlencode($row['tag_name']).'">#'.htmlspecialchars($row['tag_name']).'</a></div>';
+      }
+      ?>
+    </div>
+    
+    <div class="card">
+      <h4>Following users</h4>
+      <?php
+      $stmt = $mysqli->prepare("
+        SELECT u.username 
+        FROM follows f 
+        JOIN users u ON f.following_id = u.user_id 
+        WHERE f.follower_id = ? 
+        ORDER BY f.created_at DESC
+        LIMIT 10
+      ");
+      $stmt->bind_param('i',$uid); 
+      $stmt->execute(); 
+      $r=$stmt->get_result();
+      if($r->num_rows > 0) {
+        while($row=$r->fetch_assoc()){
+          echo '<div><a href="profile.php?u='.urlencode($row['username']).'">@'.htmlspecialchars($row['username']).'</a></div>';
+        }
+      } else {
+        echo '<div style="color:#999;font-size:90%;">Not following anyone yet</div>';
       }
       ?>
     </div>
@@ -346,7 +369,9 @@ function savePost(postId) {
   });
 }
 
-function toggleLike(postId, button) {
+function toggleLike(postId, button, uniqueCardId) {
+  console.log('toggleLike called for post:', postId, 'uniqueCardId:', uniqueCardId);
+  
   let formData = new FormData();
   formData.append('post_id', postId);
   
@@ -354,25 +379,53 @@ function toggleLike(postId, button) {
     method: 'POST',
     body: formData
   })
-  .then(response => response.text())
-  .then(result => {
-    let icon = document.getElementById('like-icon-' + postId);
-    let text = document.getElementById('like-text-' + postId);
-    let count = document.getElementById('like-count-' + postId);
+  .then(response => {
+    console.log('Response status:', response.status);
+    return response.json();
+  })
+  .then(data => {
+    console.log('Response data:', data);
     
-    if (result === 'liked') {
-      icon.textContent = '❤️';
-      text.textContent = 'Unlike';
-      count.textContent = parseInt(count.textContent) + 1;
+    if (!data.success) {
+      alert('Virhe: ' + (data.error || 'Tuntematon virhe'));
+      return;
+    }
+    
+    let icon = document.getElementById('like-icon-' + uniqueCardId);
+    let text = document.getElementById('like-text-' + uniqueCardId);
+    let count = document.getElementById('like-count-' + uniqueCardId);
+    
+    console.log('Elements found:', {icon, text, count});
+    
+    if (icon && text && count) {
+      if (data.action === 'liked') {
+        icon.textContent = '❤️';
+        text.textContent = 'Unlike';
+      } else {
+        icon.textContent = '🤍';
+        text.textContent = 'Like';
+      }
+      count.textContent = data.count;
+      console.log('UI updated successfully');
     } else {
-      icon.textContent = '🤍';
-      text.textContent = 'Like';
-      count.textContent = parseInt(count.textContent) - 1;
+      console.error('Could not find UI elements for:', uniqueCardId);
     }
   })
   .catch(err => {
+    console.error('Fetch error:', err);
     alert('Virhe: ' + err);
   });
+}
+
+function refreshFeed() {
+  fetch('fetch_posts.php?' + new URLSearchParams(window.location.search))
+    .then(response => response.text())
+    .then(html => {
+      document.getElementById('feed').innerHTML = html;
+    })
+    .catch(err => {
+      console.error('Virhe feedin päivityksessä:', err);
+    });
 }
 
 document.addEventListener("click", function(e) {
