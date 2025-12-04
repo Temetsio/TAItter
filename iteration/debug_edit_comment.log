@@ -1,0 +1,80 @@
+---
+2025-12-04T14:47:54+01:00
+POST: Array
+(
+    [content] => test
+    [comment_id] => 1
+)
+
+USERID: 
+Has mysqli: yes
+---
+2025-12-04T14:48:34+01:00
+POST: Array
+(
+    [comment_id] => 3
+    [content] => moikka!
+)
+
+USERID: 5
+Has mysqli: yes
+---
+2025-12-04T14:49:28+01:00
+POST: Array
+(
+    [comment_id] => 3
+    [content] => moikka!
+)
+
+USERID: 5
+Has mysqli: yes
+---
+2025-12-04T14:50:02+01:00
+POST: Array
+(
+    [content] => test
+    [comment_id] => 1
+)
+
+USERID: 
+Has mysqli: yes
+---
+2025-12-04T15:00:00+01:00
+POST: Array
+(
+    [comment_id] => 3
+    [content] => moikka!
+)
+
+USERID: 5
+Has mysqli: yes
+---
+2025-12-04T15:00:07+01:00
+POST: Array
+(
+    [comment_id] => 3
+    [content] => moikka moi!!
+)
+
+USERID: 5
+Has mysqli: yes
+---
+2025-12-04T15:14:25+01:00
+POST: Array
+(
+    [comment_id] => 4
+    [content] => Testaus!!
+)
+
+USERID: 5
+Has mysqli: yes
+---
+2025-12-04T15:15:06+01:00
+POST: Array
+(
+    [comment_id] => 5
+    [content] => FCEDFSDs
+)
+
+USERID: 5
+Has mysqli: yes

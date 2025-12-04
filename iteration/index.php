@@ -820,6 +820,9 @@ a:hover {
 </div>
 
 <script>
+// expose current user id to client JS
+let CURRENT_USER_ID = <?= json_encode($uid) ?>;
+
 function toggleDropdown(id, el) {
   document.querySelectorAll('.dd-menu').forEach(menu => {
     if (menu.id !== id) menu.classList.remove('show');
@@ -832,6 +835,10 @@ function toggleDropdown(id, el) {
     markSeen(id);
     let badge = el.querySelector('.badge');
     if (badge) badge.textContent = '0';
+        if (id === 'likes') {
+            // populate latest likes when opening the dropdown
+            refreshLikesDropdown();
+        }
   }
 }
 
@@ -912,28 +919,70 @@ function savePost(postId) {
 
 // ✅ LIKE
 function toggleLike(postId, button, uniqueCardId) {
-  let formData = new FormData();
-  formData.append('post_id', postId);
+    // uniqueCardId is optional; fall back to postId when not provided
+    const id = (typeof uniqueCardId !== 'undefined' && uniqueCardId !== null) ? uniqueCardId : postId;
 
-  fetch('like.php', {method: 'POST', body: formData})
-  .then(res => res.json())
-  .then(data => {
-    if (!data.success) return alert(data.error || 'Virhe');
+    let formData = new FormData();
+    formData.append('post_id', postId);
 
-    let icon = document.getElementById('like-icon-' + uniqueCardId);
-    let text = document.getElementById('like-text-' + uniqueCardId);
-    let count = document.getElementById('like-count-' + uniqueCardId);
+    fetch('like.php', {method: 'POST', body: formData})
+    .then(res => res.json())
+    .then(data => {
+        if (!data.success) return alert(data.error || 'Virhe');
 
-    if (data.action === 'liked') {
-      icon.textContent = '❤️';
-      text.textContent = 'Unlike';
-    } else {
-      icon.textContent = '🤍';
-      text.textContent = 'Like';
-    }
-    count.textContent = data.count;
-  });
+        let icon = document.getElementById('like-icon-' + id);
+        let text = document.getElementById('like-text-' + id);
+        let count = document.getElementById('like-count-' + id);
+
+        if (icon) icon.textContent = (data.action === 'liked') ? '❤️' : '🤍';
+        if (text) text.textContent = (data.action === 'liked') ? 'Unlike' : 'Like';
+        if (count) count.textContent = data.count;
+
+        // refresh the likes dropdown to reflect new like counts/items
+        try { refreshLikesDropdown(); } catch (e) { /* ignore */ }
+
+        // Optionally update the button's dataset/aria-pressed state
+        try {
+            if (button && button instanceof HTMLElement) {
+                button.dataset.liked = (data.action === 'liked') ? '1' : '0';
+            }
+        } catch (e) { /* ignore */ }
+    })
+    .catch(err => {
+        console.error('toggleLike error', err);
+        alert('Virhe verkossa');
+    });
 }
+
+// Refresh likes dropdown content and badge (calls fetch_like.php?json=1)
+function refreshLikesDropdown() {
+        let menu = document.getElementById('likes');
+        if (!menu) return;
+        fetch('fetch_like.php?json=1')
+            .then(res => res.json())
+            .then(data => {
+                if (!data || !data.success) return;
+                // replace inner card-inner content
+                let inner = menu.querySelector('.card-inner');
+                if (inner) inner.innerHTML = data.html;
+                // don't overwrite the notification badge here (it's used for unseen count)
+            })
+            .catch(err => console.error('refreshLikesDropdown', err));
+}
+
+// Periodically refresh likes dropdown so it's up-to-date even when closed.
+// Runs only when the document is visible to avoid unnecessary background requests.
+(function startLikesPolling(){
+    const INTERVAL_MS = 10000; // 10s
+    setInterval(() => {
+        try {
+            if (document.hidden) return; // skip when tab is not visible
+            refreshLikesDropdown();
+        } catch (e) {
+            console.error('likes polling', e);
+        }
+    }, INTERVAL_MS);
+})();
 
 // ✅ RELOAD FEED
 function refreshFeed() {
@@ -949,6 +998,201 @@ document.addEventListener("click", function(e) {
   }
 });
 
+// Comments: open panel, load and post
+function openComments(postId) {
+    let panel = document.getElementById('comment-panel-' + postId);
+    if (!panel) return;
+    if (panel.style.display === 'none' || panel.style.display === '') {
+        panel.style.display = 'block';
+        loadComments(postId);
+    } else {
+        panel.style.display = 'none';
+    }
+}
+
+function loadComments(postId) {
+    let listEl = document.getElementById('comment-list-' + postId);
+    if (!listEl) return;
+    listEl.innerHTML = 'Loading...';
+
+    fetch('get_comments.php?post_id=' + encodeURIComponent(postId))
+        .then(res => res.json())
+        .then(data => {
+            if (!data.success) {
+                listEl.innerHTML = '<div style="color:#900">Could not load comments</div>';
+                return;
+            }
+            if (!data.comments || data.comments.length === 0) {
+                listEl.innerHTML = '<div style="color:#666;font-size:90%">No comments yet</div>';
+            } else {
+                listEl.innerHTML = data.comments.map(c => {
+                    let controls = '';
+                    if (typeof CURRENT_USER_ID !== 'undefined' && c.user_id === CURRENT_USER_ID) {
+                                                controls = '<div style="margin-top:6px;">'
+                                                    + '<button type="button" onclick="editComment(' + postId + ',' + c.comment_id + ',\'' + encodeURIComponent(c.content) + '\')">Muokkaa</button>'
+                                                    + ' <button type="button" onclick="deleteComment(' + c.comment_id + ',' + postId + ')" style="color:red">Poista</button>'
+                                                    + '</div>';
+                    }
+
+                                        var editedLabel = '';
+                                        if (c.edited_at && c.edited_at !== null && c.edited_at !== c.created_at) {
+                                            editedLabel = ' <small style="color:#999;margin-left:6px;">(muokattu)</small>';
+                                        }
+
+                                        return '<div style="padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.05)" id="comment-' + c.comment_id + '">'
+                                                + '<a href="profile.php?u=' + encodeURIComponent(c.username) + '"><strong>@' + escapeHtml(c.username) + '</strong></a> '
+                                                + '<div class="comment-body-' + c.comment_id + '" style="font-size:14px;color:#111;margin-top:4px;">' + escapeHtml(c.content) + '</div>'
+                                                + '<div><small style="color:#999">' + c.created_at + '</small>' + editedLabel + '</div>'
+                                                + controls
+                                                + '</div>';
+                }).join('');
+            }
+
+            // update comment count badge
+            let cntEl = document.getElementById('comment-count-' + postId);
+            if (cntEl) cntEl.textContent = data.comments ? data.comments.length : 0;
+        })
+        .catch(err => {
+            listEl.innerHTML = '<div style="color:#900">Error loading comments</div>';
+            console.error('loadComments error', err);
+        });
+}
+
+function postComment(postId) {
+    let input = document.getElementById('comment-input-' + postId);
+    if (!input) return;
+    let content = input.value.trim();
+    if (!content) return;
+
+    let formData = new FormData();
+    formData.append('post_id', postId);
+    formData.append('content', content);
+
+    fetch('comment.php', { method: 'POST', body: formData })
+        .then(res => res.json())
+        .then(data => {
+            if (!data.success) {
+                alert(data.error || 'Could not post comment');
+                return;
+            }
+            input.value = '';
+            // reload the comments and update the count
+            loadComments(postId);
+            let cntEl = document.getElementById('comment-count-' + postId);
+            if (cntEl) cntEl.textContent = data.count;
+        })
+        .catch(err => {
+            console.error('postComment error', err);
+            alert('Error sending comment');
+        });
+}
+
+function escapeHtml(s) {
+    return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+// Edit comment in-place
+function editComment(postId, commentId, encodedContent) {
+    let content = decodeURIComponent(encodedContent || '');
+    let bodyEl = document.querySelector('.comment-body-' + commentId);
+    if (!bodyEl) return;
+
+    // if already editing, ignore
+    if (bodyEl.querySelector('textarea')) return;
+
+    let textarea = document.createElement('textarea');
+    textarea.style.width = '100%';
+    textarea.style.minHeight = '60px';
+    textarea.maxLength = 144;
+    textarea.value = content;
+
+    let btnSave = document.createElement('button');
+    btnSave.textContent = 'Tallenna';
+    btnSave.type = 'button';
+    btnSave.onclick = function() { saveEditedComment(commentId, postId); };
+
+    let btnCancel = document.createElement('button');
+    btnCancel.textContent = 'Peruuta';
+    btnCancel.type = 'button';
+    btnCancel.onclick = function() { cancelEdit(commentId); };
+
+    bodyEl.innerHTML = '';
+    bodyEl.appendChild(textarea);
+    bodyEl.appendChild(document.createElement('br'));
+    bodyEl.appendChild(btnSave);
+    bodyEl.appendChild(document.createTextNode(' '));
+    bodyEl.appendChild(btnCancel);
+    textarea.focus();
+}
+
+function cancelEdit(commentId) {
+    // reload comments for the parent post to restore original content
+    // find postId by searching ancestor id attribute
+    let commentEl = document.getElementById('comment-' + commentId);
+    if (!commentEl) return;
+    let postPanel = commentEl.closest('[id^="comment-panel-"]');
+    if (!postPanel) return;
+    let postId = postPanel.id.replace('comment-panel-', '');
+    loadComments(postId);
+}
+
+function saveEditedComment(commentId, postId) {
+    let textarea = document.querySelector('#comment-' + commentId + ' textarea');
+    if (!textarea) return;
+    let content = textarea.value.trim();
+    if (!content) return alert('Kommentti ei voi olla tyhjä');
+
+    let fd = new FormData();
+    fd.append('comment_id', commentId);
+    fd.append('content', content);
+
+    fetch('edit_comment.php', { method: 'POST', body: fd })
+        .then(res => res.text())
+        .then(text => {
+            let data = null;
+            try {
+                data = JSON.parse(text);
+            } catch (e) {
+                console.error('saveEditedComment: response not JSON', text);
+                alert('Server error while editing comment. See console for details.');
+                return;
+            }
+            if (!data.success) return alert(data.error || 'Edit failed');
+            // reload comments
+            loadComments(postId);
+        })
+        .catch(err => {
+            console.error('saveEditedComment', err);
+            alert('Error saving comment');
+        });
+}
+
+function deleteComment(commentId, postId) {
+    if (!confirm('Haluatko varmasti poistaa tämän kommentin?')) return;
+    let fd = new FormData();
+    fd.append('comment_id', commentId);
+
+    fetch('delete_comment.php', { method: 'POST', body: fd })
+        .then(res => res.json())
+        .then(data => {
+            if (!data.success) return alert(data.error || 'Delete failed');
+            // reload comments and update counter
+            loadComments(postId);
+            let cntEl = document.getElementById('comment-count-' + postId);
+            if (cntEl && typeof data.count !== 'undefined') cntEl.textContent = data.count;
+        })
+        .catch(err => {
+            console.error('deleteComment', err);
+            alert('Error deleting comment');
+        });
+}
+
 console.log("JS LOADED OK");
 </script>
 </body>
+</html>

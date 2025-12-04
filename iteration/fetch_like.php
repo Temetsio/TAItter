@@ -17,12 +17,20 @@ $stmt->execute();
 $r = $stmt->get_result();
 
 $likesList = "";
+$count = 0;
 while ($row = $r->fetch_assoc()) {
-    $likesList .= "<div class='dd-item'>
-        ❤️ <b>" . htmlspecialchars($row['username']) . "</b> liked:<br>
-        " . htmlspecialchars($row['content']) . "<br>
-        <small>{$row['created_at']}</small>
-    </div>";
+    $likesList .= "<div class='dd-item'>\n"
+        . "        ❤️ <b>" . htmlspecialchars($row['username']) . "</b> liked:<br>\n"
+        . "        " . htmlspecialchars($row['content']) . "<br>\n"
+        . "        <small>" . $row['created_at'] . "</small>\n"
+        . "    </div>";
+    $count++;
+}
+
+if (isset($_GET['json']) && $_GET['json']) {
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(['success' => true, 'html' => $likesList, 'count' => $count]);
+    exit;
 }
 
 echo $likesList;

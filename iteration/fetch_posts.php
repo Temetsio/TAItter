@@ -85,6 +85,9 @@ while ($row = $res->fetch_assoc()) {
     $likeText = $row['user_has_liked'] ? 'Unlike' : 'Like';
     $likeCount = $row['like_count'];
 
+    // comment_count oletetaan nyt mukana rivissä
+    $commentCount = isset($row['comment_count']) ? (int)$row['comment_count'] : 0;
+
     echo "<div class='card' id='post-{$row['post_id']}'>";
 
     if ($row['reposted_by']) {
@@ -116,10 +119,23 @@ while ($row = $res->fetch_assoc()) {
           (<span id='like-count-{$row['post_id']}'>{$likeCount}</span>)
         </button>
 
+        <button type='button' onclick='openComments({$row['post_id']})' id='comment-btn-{$row['post_id']}'>
+          💬 <span id='comment-count-{$row['post_id']}'>{$commentCount}</span>
+        </button>
+
         <form method='post' action='repost.php' style='display:inline;'>
           <input type='hidden' name='post_id' value='{$row['post_id']}'>
           <button>Repost</button>
         </form>
       </div>
+
+      <div class='comment-panel' id='comment-panel-{$row['post_id']}' style='display:none;margin-top:8px;'>
+        <div id='comment-list-{$row['post_id']}' style='margin-bottom:8px;'></div>
+        <div>
+          <input type='text' id='comment-input-{$row['post_id']}' placeholder='Kirjoita kommentti' maxlength='144' style='width:75%'>
+          <button type='button' onclick='postComment({$row['post_id']})'>Lähetä</button>
+        </div>
+      </div>
+
     </div>";
 }

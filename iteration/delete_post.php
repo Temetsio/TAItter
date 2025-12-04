@@ -14,6 +14,7 @@ if (!isset($_POST['post_id'])) {
 
 $post_id = intval($_POST['post_id']);
 $user_id = current_user_id();
+
 $stmt = $mysqli->prepare("DELETE FROM posts WHERE post_id = ? AND user_id = ?");
 
 if (!$stmt) {
