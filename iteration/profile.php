@@ -309,6 +309,20 @@ a:hover {
     gap: 4px;
 }
 
+.profile-stat-link {
+    display: flex;
+    gap: 4px;
+    align-items: baseline;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+}
+
+.profile-stat-link:hover .profile-stat-label {
+    text-decoration: underline;
+}
+
+
 .profile-stat-number {
     font-weight: 600;
     color: var(--text-main);
@@ -424,16 +438,17 @@ a:hover {
                 <h1 class="profile-username"><?= htmlspecialchars($row['username']) ?></h1>
                 <div class="profile-handle">@<?= htmlspecialchars($row['username']) ?></div>
                 
-                <div class="profile-stats">
-                    <div class="profile-stat">
-                        <span class="profile-stat-number"><?= $followersCount ?></span>
-                        <span class="profile-stat-label">Followers</span>
-                    </div>
-                    <div class="profile-stat">
-                        <span class="profile-stat-number"><?= $followingCount ?></span>
-                        <span class="profile-stat-label">Following</span>
-                    </div>
-                </div>
+<div class="profile-stats">
+    <a class="profile-stat-link" href="followers.php?u=<?= urlencode($row['username']) ?>">
+        <span class="profile-stat-number"><?= $followersCount ?></span>
+        <span class="profile-stat-label">Followers</span>
+    </a>
+    <a class="profile-stat-link" href="following.php?u=<?= urlencode($row['username']) ?>">
+        <span class="profile-stat-number"><?= $followingCount ?></span>
+        <span class="profile-stat-label">Following</span>
+    </a>
+</div>
+
                 
                 <div class="profile-meta">
                     Joined <?= htmlspecialchars(date('F j, Y', strtotime($row['created_at']))) ?>
@@ -496,7 +511,7 @@ a:hover {
                     echo "<div class='post-card'>
                             <div class='post-meta'>".$p['created_at']."</div>
                             <div class='post-body'>$c</div>
-                          </div>";
+                        </div>";
                 }
                 ?>
             </div>
