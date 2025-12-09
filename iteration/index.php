@@ -53,6 +53,7 @@ body {
     gap: 16px;
 }
 
+
 /* Card */
 .card {
     background: var(--bg-card);
@@ -63,6 +64,13 @@ body {
     position: relative;
     overflow: visible;
 }
+
+/* Make the topbar card sit above the other cards */
+.app-shell > .card:first-of-type {
+    position: relative;
+    z-index: 50;
+}
+
 
 
 .card::before {
@@ -84,6 +92,8 @@ body {
     align-items: center;
     justify-content: space-between;
     gap: 16px;
+    position: relative;
+    z-index: 50;
 }
 
 .topbar-left {
