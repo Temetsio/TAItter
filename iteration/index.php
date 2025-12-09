@@ -59,18 +59,16 @@ body {
     backdrop-filter: blur(18px);
     border-radius: 18px;
     padding: 16px 18px;
-    box-shadow: 0 16px 35px rgba(255, 105, 180, 0.25);
+    box-shadow: none;   
     position: relative;
-    overflow: hidden;
+    overflow: visible;
 }
+
 
 .card::before {
     content: "";
     position: absolute;
     inset: -40px;
-    background:
-        radial-gradient(circle at top left, rgba(255,255,255,0.6), transparent 55%),
-        radial-gradient(circle at bottom right, rgba(255,255,255,0.5), transparent 55%);
     opacity: 0.5;
     pointer-events: none;
 }
@@ -225,6 +223,12 @@ a:hover {
 .right-column {
     position: sticky;
     top: 20px;
+}
+
+/* add vertical space between sidebar cards */
+.left-column .card + .card,
+.right-column .card + .card {
+    margin-top: 16px;
 }
 
 /* Sidebar */
@@ -493,13 +497,13 @@ a:hover {
                 <?php
                 // Mentions count
                 $stmt = $mysqli->prepare("
-                  SELECT COUNT(*) AS cnt
-                  FROM posts p
-                  WHERE p.content LIKE ?
+                    SELECT COUNT(*) AS cnt
+                    FROM posts p
+                    WHERE p.content LIKE ?
                     AND p.user_id != ?
                     AND p.created_at > IFNULL(
-                      (SELECT last_seen_mentions FROM users WHERE user_id = ?),
-                      '1970-01-01'
+                        (SELECT last_seen_mentions FROM users WHERE user_id = ?),
+                        '1970-01-01'
                     )
                 ");
                 $stmt->bind_param("sii",$like,$uid,$uid);
@@ -508,13 +512,13 @@ a:hover {
 
                 // Shares count
                 $stmt = $mysqli->prepare("
-                  SELECT COUNT(*) AS cnt
-                  FROM reposts r
-                  JOIN posts p ON r.post_id = p.post_id
-                  WHERE p.user_id = ?
+                    SELECT COUNT(*) AS cnt
+                    FROM reposts r
+                    JOIN posts p ON r.post_id = p.post_id
+                    WHERE p.user_id = ?
                     AND r.created_at > IFNULL(
-                      (SELECT last_seen_shares FROM users WHERE user_id = ?),
-                      '1970-01-01'
+                        (SELECT last_seen_shares FROM users WHERE user_id = ?),
+                        '1970-01-01'
                     )
                 ");
                 $stmt->bind_param("ii",$uid,$uid);
@@ -523,13 +527,13 @@ a:hover {
 
                 // Likes count
                 $stmt = $mysqli->prepare("
-                  SELECT COUNT(*) AS cnt
-                  FROM likes l
-                  JOIN posts p ON l.post_id = p.post_id
-                  WHERE p.user_id = ?
+                    SELECT COUNT(*) AS cnt
+                    FROM likes l
+                    JOIN posts p ON l.post_id = p.post_id
+                    WHERE p.user_id = ?
                     AND l.created_at > IFNULL(
-                      (SELECT last_seen_likes FROM users WHERE user_id = ?),
-                      '1970-01-01'
+                        (SELECT last_seen_likes FROM users WHERE user_id = ?),
+                        '1970-01-01'
                     )
                 ");
                 $stmt->bind_param("ii",$uid,$uid);
@@ -547,17 +551,17 @@ a:hover {
                         <div class="card-inner">
                             <?php
                             $stmt = $mysqli->prepare("
-                              SELECT u.username AS username, p.content AS content, p.created_at AS created_at
-                              FROM posts p
-                              JOIN users u ON p.user_id = u.user_id
-                              WHERE p.content LIKE ?
+                                SELECT u.username AS username, p.content AS content, p.created_at AS created_at
+                                FROM posts p
+                                JOIN users u ON p.user_id = u.user_id
+                                WHERE p.content LIKE ?
                                 AND p.user_id != ?
                                 AND p.created_at > IFNULL(
-                                  (SELECT last_seen_mentions FROM users WHERE user_id = ?),
-                                  '1970-01-01'
+                                    (SELECT last_seen_mentions FROM users WHERE user_id = ?),
+                                    '1970-01-01'
                                 )
-                              ORDER BY p.created_at DESC
-                              LIMIT 10
+                                ORDER BY p.created_at DESC
+                                LIMIT 10
                             ");
                             $stmt->bind_param("sii",$like,$uid,$uid);
                             $stmt->execute();
@@ -567,7 +571,7 @@ a:hover {
                                         <b>@".htmlspecialchars($row['username'])."</b><br>"
                                         .htmlspecialchars($row['content']).
                                         "<small>{$row['created_at']}</small>
-                                      </div>";
+                                    </div>";
                             }
                             ?>
                         </div>
@@ -584,17 +588,17 @@ a:hover {
                         <div class="card-inner">
                             <?php
                             $stmt = $mysqli->prepare("
-                              SELECT u.username AS username, p.content AS content, r.created_at AS created_at
-                              FROM reposts r
-                              JOIN posts p ON r.post_id = p.post_id
-                              JOIN users u ON r.user_id = u.user_id
-                              WHERE p.user_id = ?
+                            SELECT u.username AS username, p.content AS content, r.created_at AS created_at
+                            FROM reposts r
+                            JOIN posts p ON r.post_id = p.post_id
+                            JOIN users u ON r.user_id = u.user_id
+                            WHERE p.user_id = ?
                                 AND r.created_at > IFNULL(
-                                  (SELECT last_seen_shares FROM users WHERE user_id = ?),
-                                  '1970-01-01'
+                                    (SELECT last_seen_shares FROM users WHERE user_id = ?),
+                                    '1970-01-01'
                                 )
-                              ORDER BY r.created_at DESC
-                              LIMIT 10
+                                ORDER BY r.created_at DESC
+                                LIMIT 10
                             ");
                             $stmt->bind_param("ii",$uid,$uid);
                             $stmt->execute();
@@ -604,7 +608,7 @@ a:hover {
                                         🔁 <b>".htmlspecialchars($row['username'])."</b> shared:<br>"
                                         .htmlspecialchars($row['content']).
                                         "<small>{$row['created_at']}</small>
-                                      </div>";
+                                    </div>";
                             }
                             ?>
                         </div>
@@ -613,7 +617,7 @@ a:hover {
 
                 <!-- Likes dropdown -->
                 <div class="dropdown">
-                    <a href="#" class="dropdown-toggle" onclick="toggleDropdown('likes', this);return false;">
+                    <a href="#" class="dropdown-toggle" onclick="toggleDropdown('likes', this);return false%;">
                         <span>❤️ Likes</span>
                         <span class="badge"><?= $lk ?></span>
                     </a>
@@ -621,17 +625,17 @@ a:hover {
                         <div class="card-inner">
                             <?php
                             $stmt = $mysqli->prepare("
-                              SELECT u.username AS username, p.content AS content, l.created_at AS created_at
-                              FROM likes l
-                              JOIN posts p ON l.post_id = p.post_id
-                              JOIN users u ON l.user_id = u.user_id
-                              WHERE p.user_id = ?
+                                SELECT u.username AS username, p.content AS content, l.created_at AS created_at
+                                FROM likes l
+                                JOIN posts p ON l.post_id = p.post_id
+                                JOIN users u ON l.user_id = u.user_id
+                                WHERE p.user_id = ?
                                 AND l.created_at > IFNULL(
-                                  (SELECT last_seen_likes FROM users WHERE user_id = ?),
-                                  '1970-01-01'
+                                    (SELECT last_seen_likes FROM users WHERE user_id = ?),
+                                    '1970-01-01'
                                 )
-                              ORDER BY l.created_at DESC
-                              LIMIT 10
+                            ORDER BY l.created_at DESC
+                            LIMIT 10
                             ");
                             $stmt->bind_param("ii",$uid,$uid);
                             $stmt->execute();
@@ -641,7 +645,7 @@ a:hover {
                                         ❤️ <b>".htmlspecialchars($row['username'])."</b> liked:<br>"
                                         .htmlspecialchars($row['content']).
                                         "<small>{$row['created_at']}</small>
-                                      </div>";
+                                    </div>";
                             }
                             ?>
                         </div>
@@ -694,22 +698,22 @@ a:hover {
                     <div>
                     <?php
                     $stmt = $mysqli->prepare("
-                      SELECT u.username 
-                      FROM follows f 
-                      JOIN users u ON f.following_id = u.user_id 
-                      WHERE f.follower_id = ? 
-                      ORDER BY f.created_at DESC
-                      LIMIT 10
+                        SELECT u.username 
+                        FROM follows f 
+                        JOIN users u ON f.following_id = u.user_id 
+                        WHERE f.follower_id = ? 
+                        ORDER BY f.created_at DESC
+                        LIMIT 10
                     ");
                     $stmt->bind_param('i',$uid); 
                     $stmt->execute(); 
                     $r=$stmt->get_result();
                     if($r->num_rows > 0) {
-                      while($row=$r->fetch_assoc()){
+                        while($row=$r->fetch_assoc()){
                         echo '<div><a href="profile.php?u='.urlencode($row['username']).'">@'.htmlspecialchars($row['username']).'</a></div>';
-                      }
+                    }
                     } else {
-                      echo '<div style="color:#999;font-size:90%;">Not following anyone yet</div>';
+                        echo '<div style="color:#999;font-size:90%;">Not following anyone yet</div>';
                     }
                     ?>
                     </div>
@@ -725,10 +729,10 @@ a:hover {
                         <h3 class="sidebar-heading">Viewing: #<?= htmlspecialchars($filterHashtag) ?></h3>
                         <?php
                         $stmt = $mysqli->prepare("
-                          SELECT COUNT(*) as is_following 
-                          FROM followed_hashtags fh
-                          JOIN hashtags h ON fh.hashtag_id = h.hashtag_id
-                          WHERE fh.user_id = ? AND h.tag_name = ?
+                            SELECT COUNT(*) as is_following 
+                            FROM followed_hashtags fh
+                            JOIN hashtags h ON fh.hashtag_id = h.hashtag_id
+                            WHERE fh.user_id = ? AND h.tag_name = ?
                         ");
                         $stmt->bind_param("is", $uid, $filterHashtag);
                         $stmt->execute();
@@ -794,7 +798,7 @@ a:hover {
                             echo '<div>
                                     <a class="tag-chip" href="index.php?hashtag='.urlencode($row['tag_name']).'">#'.htmlspecialchars($row['tag_name']).'</a>
                                     <span class="trending-count">· '.$row['cnt'].' posts</span>
-                                  </div>';
+                                </div>';
                         }
                         ?>
                     </div>
@@ -846,7 +850,7 @@ function markSeen(type) {
   fetch("mark_seen.php?type=" + type);
 }
 
-// ✅ DELETE POST (GLOBAL)
+//  DELETE POST 
 function deletePost(postId) {
   if (!confirm("Haluatko varmasti poistaa tämän postauksen?")) return;
 
@@ -867,7 +871,7 @@ function deletePost(postId) {
   .catch(err => alert("Virhe: " + err));
 }
 
-// ✅ EDIT POST
+// EDIT POST
 function editPost(postId, currentContent) {
   let contentDiv = document.querySelector('.post-content-' + postId);
   let form = document.createElement('form');
@@ -903,7 +907,7 @@ function editPost(postId, currentContent) {
   textarea.focus();
 }
 
-// ✅ SAVE POST
+// SAVE POST
 function savePost(postId) {
   let textarea = document.getElementById('edit-' + postId);
   let content = textarea.value;
@@ -917,7 +921,7 @@ function savePost(postId) {
   .catch(err => alert('Virhe: ' + err));
 }
 
-// ✅ LIKE
+//  LIKE
 function toggleLike(postId, button, uniqueCardId) {
     // uniqueCardId is optional; fall back to postId when not provided
     const id = (typeof uniqueCardId !== 'undefined' && uniqueCardId !== null) ? uniqueCardId : postId;
@@ -984,14 +988,14 @@ function refreshLikesDropdown() {
     }, INTERVAL_MS);
 })();
 
-// ✅ RELOAD FEED
+//  RELOAD FEED
 function refreshFeed() {
   fetch('fetch_posts.php?' + new URLSearchParams(window.location.search))
     .then(res => res.text())
     .then(html => document.getElementById('feed').innerHTML = html);
 }
 
-// ✅ DROPBOX CLICK OUTSIDE
+//  DROPBOX CLICK OUTSIDE
 document.addEventListener("click", function(e) {
   if (!e.target.closest('.dropdown')) {
     document.querySelectorAll('.dd-menu').forEach(el => el.classList.remove('show'));
@@ -1102,7 +1106,6 @@ function editComment(postId, commentId, encodedContent) {
     let bodyEl = document.querySelector('.comment-body-' + commentId);
     if (!bodyEl) return;
 
-    // if already editing, ignore
     if (bodyEl.querySelector('textarea')) return;
 
     let textarea = document.createElement('textarea');
