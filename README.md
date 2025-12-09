@@ -218,7 +218,7 @@ Projekti tehty osana Juhannuskukkulan tietokantakurssia.
 
 **Tiimi**: Meleqe, Teemu, Vesku ja Jenni
 
-**Päivämäärä**: Lokakuu 2025
+**Päivämäärä**: Joulukuu 2025
 
 ## Lisenssi
 
