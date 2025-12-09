@@ -129,13 +129,6 @@ Tietokannassa on valmiina 5 testikäyttäjää:
 - `posts` (1) → (n) `mentions`
 - `posts` (n) ↔ (n) `hashtags` (`post_hashtags`-välitaulu)
 
-## Tekninen toteutus
-
-- **Tietokanta**: MariaDB 10.4.32
-- **PHP**: 8.2.12
-- **Merkistö**: UTF-8 (utf8mb4)
-- **Indeksointi**: Optimoitu kyselyille (käyttäjä- ja hashtaghaut)
-
 ## Asennus
 
 ### TIETOKANNAN TUONTI(XAMPP)
