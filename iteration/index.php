@@ -834,7 +834,7 @@ a:hover {
 </div>
 
 <script>
-// expose current user id to client JS
+
 let CURRENT_USER_ID = <?= json_encode($uid) ?>;
 
 function toggleDropdown(id, el) {
@@ -850,7 +850,6 @@ function toggleDropdown(id, el) {
     let badge = el.querySelector('.badge');
     if (badge) badge.textContent = '0';
         if (id === 'likes') {
-            // populate latest likes when opening the dropdown
             refreshLikesDropdown();
         }
   }
@@ -952,10 +951,8 @@ function toggleLike(postId, button, uniqueCardId) {
         if (text) text.textContent = (data.action === 'liked') ? 'Unlike' : 'Like';
         if (count) count.textContent = data.count;
 
-        // refresh the likes dropdown to reflect new like counts/items
         try { refreshLikesDropdown(); } catch (e) { /* ignore */ }
 
-        // Optionally update the button's dataset/aria-pressed state
         try {
             if (button && button instanceof HTMLElement) {
                 button.dataset.liked = (data.action === 'liked') ? '1' : '0';
@@ -968,7 +965,6 @@ function toggleLike(postId, button, uniqueCardId) {
     });
 }
 
-// Refresh likes dropdown content and badge (calls fetch_like.php?json=1)
 function refreshLikesDropdown() {
         let menu = document.getElementById('likes');
         if (!menu) return;
@@ -976,21 +972,17 @@ function refreshLikesDropdown() {
             .then(res => res.json())
             .then(data => {
                 if (!data || !data.success) return;
-                // replace inner card-inner content
                 let inner = menu.querySelector('.card-inner');
                 if (inner) inner.innerHTML = data.html;
-                // don't overwrite the notification badge here (it's used for unseen count)
             })
             .catch(err => console.error('refreshLikesDropdown', err));
 }
 
-// Periodically refresh likes dropdown so it's up-to-date even when closed.
-// Runs only when the document is visible to avoid unnecessary background requests.
 (function startLikesPolling(){
-    const INTERVAL_MS = 10000; // 10s
+    const INTERVAL_MS = 10000; 
     setInterval(() => {
         try {
-            if (document.hidden) return; // skip when tab is not visible
+            if (document.hidden) return; 
             refreshLikesDropdown();
         } catch (e) {
             console.error('likes polling', e);
@@ -1150,8 +1142,6 @@ function editComment(postId, commentId, encodedContent) {
 }
 
 function cancelEdit(commentId) {
-    // reload comments for the parent post to restore original content
-    // find postId by searching ancestor id attribute
     let commentEl = document.getElementById('comment-' + commentId);
     if (!commentEl) return;
     let postPanel = commentEl.closest('[id^="comment-panel-"]');
@@ -1182,7 +1172,6 @@ function saveEditedComment(commentId, postId) {
                 return;
             }
             if (!data.success) return alert(data.error || 'Edit failed');
-            // reload comments
             loadComments(postId);
         })
         .catch(err => {
@@ -1200,7 +1189,6 @@ function deleteComment(commentId, postId) {
         .then(res => res.json())
         .then(data => {
             if (!data.success) return alert(data.error || 'Delete failed');
-            // reload comments and update counter
             loadComments(postId);
             let cntEl = document.getElementById('comment-count-' + postId);
             if (cntEl && typeof data.count !== 'undefined') cntEl.textContent = data.count;
@@ -1210,6 +1198,48 @@ function deleteComment(commentId, postId) {
             alert('Error deleting comment');
         });
 }
+
+(function startCommentPolling(){
+    const INTERVAL_MS = 10000;
+
+    setInterval(() => {
+        try {
+            if (document.hidden) return;
+            refreshCommentCounts();
+        } catch (e) {
+            console.error('comment polling error', e);
+        }
+    }, INTERVAL_MS);
+})();
+
+function refreshCommentCounts() {
+    let ids = [];
+    document.querySelectorAll('[id^="comment-count-"]').forEach(el => {
+        let id = el.id.replace('comment-count-', '');
+        if (id) ids.push(id);
+    });
+
+    if (ids.length === 0) return;
+
+    fetch('fetch_comment_counts.php', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ post_ids: ids })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (!data.success) return;
+
+        let counts = data.counts;
+
+        for (let postId in counts) {
+            let el = document.getElementById('comment-count-' + postId);
+            if (el) el.textContent = counts[postId];
+        }
+    })
+    .catch(err => console.error('refreshCommentCounts error', err));
+}
+
 
 console.log("JS LOADED OK");
 </script>
