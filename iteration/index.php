@@ -1075,6 +1075,7 @@ function loadComments(postId) {
 function postComment(postId) {
     let input = document.getElementById('comment-input-' + postId);
     if (!input) return;
+
     let content = input.value.trim();
     if (!content) return;
 
@@ -1089,17 +1090,22 @@ function postComment(postId) {
                 alert(data.error || 'Could not post comment');
                 return;
             }
+
             input.value = '';
-            // reload the comments and update the count
-            loadComments(postId);
             let cntEl = document.getElementById('comment-count-' + postId);
             if (cntEl) cntEl.textContent = data.count;
+
+            let panel = document.getElementById('comment-panel-' + postId);
+            if (panel && panel.style.display === 'block') {
+                loadComments(postId);
+            }
         })
         .catch(err => {
             console.error('postComment error', err);
             alert('Error sending comment');
         });
 }
+
 
 function escapeHtml(s) {
     return String(s)
