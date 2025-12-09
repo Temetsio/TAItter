@@ -15,7 +15,7 @@ Taitter on Twitter-tyyppinen sosiaalisen median sovellus TAI:n opiskelijoille, j
 - **Seuraaminen**: Käyttäjät voivat seurata toisiaan
 - **Hashtagit**: Viesteihin voi lisätä hashtageja ja käyttäjät voivat seurata hashtageja
 - **Maininnat**: Käyttäjät voivat mainita toisia käyttäjiä viesteissään
-- **Tykkäykset**: Viestejä voi tykätä
+- **Tykkäykset**: Viesteistä voi tykätä
 - **Uudelleenjako (Reposts)**: Viestejä voi jakaa eteenpäin
 - **Kommentit**: Viesteihin voi kommentoida
 - **Käyttäjäprofiilit**: Käyttäjillä on profiili, jossa bio ja profiilikuva
