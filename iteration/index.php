@@ -3,6 +3,7 @@ require_once 'config.php';
 if (!current_user_id()) { header('Location: login.php'); exit; }
 
 $filterHashtag = $_GET['hashtag'] ?? null;
+$filterUser = $_GET['user'] ?? null;
 $uid = current_user_id();
 $like = '%@'.current_username().'%';
 ?>
@@ -729,6 +730,52 @@ a:hover {
                     </div>
                 </div>
             </div>
+
+                        <div class="card">
+                <div class="card-inner">
+                    <h4 class="sidebar-heading">Search users</h4>
+                    <p class="sidebar-sub">Type without the @ symbol.</p>
+
+                    <form method="get" action="index.php" class="search-form">
+                        <input
+                            name="user"
+                            placeholder="e.g. Meli"
+                            value="<?= htmlspecialchars($filterUser ?? '') ?>">
+                        <button type="submit">Search</button>
+                    </form>
+
+                    <?php if (!empty($filterUser)): ?>
+                        <div style="margin-top:10px;font-size:13px;">
+                            <?php
+                            $term = '%'.$filterUser.'%';
+                            $stmt = $mysqli->prepare("
+                                SELECT username
+                                FROM users
+                                WHERE username LIKE ?
+                                ORDER BY username ASC
+                                LIMIT 10
+                            ");
+                            $stmt->bind_param('s', $term);
+                            $stmt->execute();
+                            $resUsers = $stmt->get_result();
+
+                            if ($resUsers->num_rows === 0) {
+                                echo '<div style="color:#999;">No users found</div>';
+                            } else {
+                                while ($u = $resUsers->fetch_assoc()) {
+                                    echo '<div><a href="profile.php?u='
+                                         .urlencode($u['username'])
+                                         .'">@'
+                                         .htmlspecialchars($u['username'])
+                                         .'</a></div>';
+                                }
+                            }
+                            ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+
         </aside>
 
         <!-- MIDDLE COLUMN -->
