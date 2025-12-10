@@ -236,7 +236,7 @@ a:hover {
                 <div class="logo-badge">T</div>
                 <div class="app-title">
                     <span>TAltter</span>
-                    <span>Users followed by @<?= htmlspecialchars($profile['username']) ?></span>
+                    <span>Users liked by @<?= htmlspecialchars($profile['username']) ?></span>
                 </div>
             </div>
             <div class="topbar-right">
@@ -248,7 +248,7 @@ a:hover {
     <div class="card">
         <div class="card-inner">
             <h2 class="section-title">
-                Following (<?= $following->num_rows ?>)
+                Liked (<?= $following->num_rows ?>)
             </h2>
 
             <?php if ($following->num_rows === 0): ?>

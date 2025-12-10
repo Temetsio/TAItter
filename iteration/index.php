@@ -948,7 +948,7 @@ function markSeen(type) {
 
 //  DELETE POST 
 function deletePost(postId) {
-  if (!confirm("Are you sure you want to delete the post?")) return;
+  if (!confirm("Haluatko varmasti poistaa tämän postauksen?")) return;
 
   fetch("delete_post.php", {
     method: "POST",
@@ -961,7 +961,7 @@ function deletePost(postId) {
       let el = document.getElementById("post-" + postId);
       if (el) el.remove();
     } else {
-      alert("Delete failed: " + r);
+      alert("Poisto epäonnistui: " + r);
     }
   })
   .catch(err => alert("Virhe: " + err));
@@ -984,11 +984,11 @@ function editPost(postId, currentContent) {
   textarea.maxLength = 144;
 
   let btnSave = document.createElement('button');
-  btnSave.textContent = 'Save';
+  btnSave.textContent = 'Tallenna';
   btnSave.type = 'submit';
 
   let btnCancel = document.createElement('button');
-  btnCancel.textContent = 'Cancel';
+  btnCancel.textContent = 'Peruuta';
   btnCancel.type = 'button';
   btnCancel.onclick = () => location.reload();
 
@@ -1013,8 +1013,8 @@ function savePost(postId) {
   formData.append('content', content);
 
   fetch('edit_post.php', { method: 'POST', body: formData })
-  .then(r => r.ok ? location.reload() : alert('Error saving post'))
-  .catch(err => alert('Error: ' + err));
+  .then(r => r.ok ? location.reload() : alert('Virhe tallennuksessa'))
+  .catch(err => alert('Virhe: ' + err));
 }
 
 //  LIKE
@@ -1027,7 +1027,7 @@ function toggleLike(postId, button, uniqueCardId) {
     fetch('like.php', {method: 'POST', body: formData})
     .then(res => res.json())
     .then(data => {
-        if (!data.success) return alert(data.error || 'Error');
+        if (!data.success) return alert(data.error || 'Virhe');
 
         let icon = document.getElementById('like-icon-' + id);
         let text = document.getElementById('like-text-' + id);
@@ -1047,7 +1047,7 @@ function toggleLike(postId, button, uniqueCardId) {
     })
     .catch(err => {
         console.error('toggleLike error', err);
-        alert('Error');
+        alert('Virhe verkossa');
     });
 }
 
@@ -1138,14 +1138,14 @@ function loadComments(postId) {
                     let controls = '';
                     if (typeof CURRENT_USER_ID !== 'undefined' && c.user_id === CURRENT_USER_ID) {
                         controls = '<div style="margin-top:6px;">'
-                            + '<button type="button" onclick="editComment(' + postId + ',' + c.comment_id + ',\'' + encodeURIComponent(c.content) + '\')">Edit</button>'
-                            + ' <button type="button" onclick="deleteComment(' + c.comment_id + ',' + postId + ')" style="color:red">Delete</button>'
+                            + '<button type="button" onclick="editComment(' + postId + ',' + c.comment_id + ',\'' + encodeURIComponent(c.content) + '\')">Muokkaa</button>'
+                            + ' <button type="button" onclick="deleteComment(' + c.comment_id + ',' + postId + ')" style="color:red">Poista</button>'
                             + '</div>';
                     }
 
                     var editedLabel = '';
                     if (c.edited_at && c.edited_at !== null && c.edited_at !== c.created_at) {
-                        editedLabel = ' <small style="color:#999;margin-left:6px;">(edited)</small>';
+                        editedLabel = ' <small style="color:#999;margin-left:6px;">(muokattu)</small>';
                     }
 
                     return '<div style="padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.05)" id="comment-' + c.comment_id + '">'
@@ -1223,12 +1223,12 @@ function editComment(postId, commentId, encodedContent) {
     textarea.value = content;
 
     let btnSave = document.createElement('button');
-    btnSave.textContent = 'Save';
+    btnSave.textContent = 'Tallenna';
     btnSave.type = 'button';
     btnSave.onclick = function() { saveEditedComment(commentId, postId); };
 
     let btnCancel = document.createElement('button');
-    btnCancel.textContent = 'Cancel';
+    btnCancel.textContent = 'Peruuta';
     btnCancel.type = 'button';
     btnCancel.onclick = function() { cancelEdit(commentId); };
 
@@ -1254,7 +1254,7 @@ function saveEditedComment(commentId, postId) {
     let textarea = document.querySelector('#comment-' + commentId + ' textarea');
     if (!textarea) return;
     let content = textarea.value.trim();
-    if (!content) return alert('Comment cannot be empty');
+    if (!content) return alert('Kommentti ei voi olla tyhjä');
 
     let fd = new FormData();
     fd.append('comment_id', commentId);
@@ -1281,7 +1281,7 @@ function saveEditedComment(commentId, postId) {
 }
 
 function deleteComment(commentId, postId) {
-    if (!confirm('Are you sure you want to delete comment?')) return;
+    if (!confirm('Haluatko varmasti poistaa tämän kommentin?')) return;
     let fd = new FormData();
     fd.append('comment_id', commentId);
 
