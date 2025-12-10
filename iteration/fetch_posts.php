@@ -79,7 +79,7 @@ while ($row = $res->fetch_assoc()) {
     $content = preg_replace('/@([A-Za-z0-9_]+)/', '<a href="profile.php?u=$1">@$1</a>', $content);
 
     $isOwnPost = ($row['user_id'] == $currentUserId);
-    $editedLabel = $row['edited_at'] ? '<small style="color:#999;margin-left:6px;">(muokattu)</small>' : '';
+    $editedLabel = $row['edited_at'] ? '<small style="color:#999;margin-left:6px;">(edited)</small>' : '';
 
     $likeIcon = $row['user_has_liked'] ? '❤️' : '🤍';
     $likeText = $row['user_has_liked'] ? 'Unlike' : 'Like';
@@ -131,8 +131,8 @@ while ($row = $res->fetch_assoc()) {
       <div class='comment-panel' id='comment-panel-{$row['post_id']}' style='display:none;margin-top:8px;'>
         <div id='comment-list-{$row['post_id']}' style='margin-bottom:8px;'></div>
         <div>
-          <input type='text' id='comment-input-{$row['post_id']}' placeholder='Kirjoita kommentti' maxlength='144' style='width:75%'>
-          <button type='button' onclick='postComment({$row['post_id']})'>Lähetä</button>
+          <input type='text' id='comment-input-{$row['post_id']}' placeholder='Type a comment' maxlength='144' style='width:75%'>
+          <button type='button' onclick='postComment({$row['post_id']})'>Send</button>
         </div>
       </div>
 
