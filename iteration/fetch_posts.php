@@ -106,8 +106,8 @@ while ($row = $res->fetch_assoc()) {
         $rawContent = htmlspecialchars(addslashes($row['content']));
         echo "
         <div style='margin-top:8px;'>
-            <button onclick=\"editPost({$row['post_id']}, '{$rawContent}')\">Muokkaa</button>
-            <button onclick=\"deletePost({$row['post_id']})\" style='color:red;margin-left:6px;'>Poista</button>
+            <button onclick=\"editPost({$row['post_id']}, '{$rawContent}')\">Edit</button>
+            <button onclick=\"deletePost({$row['post_id']})\" style='color:red;margin-left:6px;'>Delete</button>
         </div>";
     }
 
