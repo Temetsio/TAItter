@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $bioCurrent = $bio; 
 
     if (strlen($bio) > 160) {
-        $errors[] = "Bio saa olla max 160 merkkiä.";
+        $errors[] = "Bio can be max 160 characters.";
     }
 
     $imgPath = $user['profile_picture_url'];
@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $allowed = ['jpg','jpeg','png','webp'];
 
         if (!in_array(strtolower($ext), $allowed)) {
-            $errors[] = "Vain JPG, PNG tai WEBP on sallittu.";
+            $errors[] = "Only JPG, PNG or WEBP allowed.";
         } else {
             $newName = "pfp_".$uid."_".time().".".$ext;
             $targetFile = $targetDir . $newName;
@@ -386,7 +386,7 @@ textarea:focus {
                         rows="5"
                     ><?= htmlspecialchars($bioCurrent) ?></textarea>
                     <div class="helper-text">
-                        Max 160 merkkiä.
+                        Max 160 characters.
                     </div>
                     <div id="bio-counter" class="char-counter"></div>
                 </div>
@@ -404,7 +404,7 @@ textarea:focus {
 
                         <div>
                             <input class="file-input" type="file" name="profile_picture" accept=".jpg,.jpeg,.png,.webp">
-                            <div class="helper-text">Vain JPG, PNG tai WEBP on sallittu.</div>
+                            <div class="helper-text">Only JPG, PNG or WEBP allowed.</div>
                         </div>
                     </div>
                 </div>
