@@ -5,7 +5,7 @@ Taitter on Twitter-tyyppinen sosiaalisen median sovellus TAI:n opiskelijoille, j
 
 ## TIIMI
 - Jenni: Tietokantasuunnittelu ja -toteutus, php, readme.md
-- Vesku: Backend-arkkitehtuuri ja tietokantayhteys, php
+- Vesku: Backend-arkkitehtuuri ja tietokantayhteys, php, testaus
 - Meleqe: UI/UX-suunnittelu, HTML/CSS, powerpoint
 - Teemu: Github reposition luominen
 
