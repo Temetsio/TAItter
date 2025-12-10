@@ -177,7 +177,7 @@ Palvelin: Apache (XAMPP)
 ### PROJEKTIRAKENNE
 `````
 taitter/
-├──interation/
+├──site/
 │   ├── comment.php/
 │   ├── config.php/
 │   ├── debug_edit_comment.php/
@@ -194,7 +194,7 @@ taitter/
 │   ├── followers/
 │   ├── following/
 │   ├── get_comments.php/
-│   ├── get_comments_count.php/
+│   ├── get_likes_count.php/
 │   ├── index.php/
 │   ├── like.php/
 │   ├── login.php/
