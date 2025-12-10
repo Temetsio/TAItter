@@ -12,7 +12,7 @@ Taitter on Twitter-tyyppinen sosiaalisen median sovellus TAI:n opiskelijoille, j
 ## Ominaisuudet
 
 - **Viestit (Posts)**: Käyttäjät voivat julkaista enintään 144 merkin pituisia viestejä
-- **Seuraaminen**: Käyttäjät voivat seurata toisiaan
+- **Seuraaminen/Käyttäjästä tykkäys**: Käyttäjät voivat tykätä toisistaan
 - **Hashtagit**: Viesteihin voi lisätä hashtageja ja käyttäjät voivat seurata hashtageja
 - **Maininnat**: Käyttäjät voivat mainita toisia käyttäjiä viesteissään
 - **Tykkäykset**: Viesteistä voi tykätä
@@ -177,7 +177,7 @@ Palvelin: Apache (XAMPP)
 ### PROJEKTIRAKENNE
 `````
 taitter/
-├──interation/
+├──site/
 │   ├── comment.php/
 │   ├── config.php/
 │   ├── debug_edit_comment.php/
@@ -194,7 +194,7 @@ taitter/
 │   ├── followers/
 │   ├── following/
 │   ├── get_comments.php/
-│   ├── get_comments_count.php/
+│   ├── get_likes_count.php/
 │   ├── index.php/
 │   ├── like.php/
 │   ├── login.php/

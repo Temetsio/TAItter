@@ -39,7 +39,7 @@ $r = $stmt2->get_result();
 
 $html = '';
 if ($r->num_rows === 0) {
-    $html = '<div style="padding:12px;color:#999;font-size:13px;">Ei uusia tykkäyksiä</div>';
+    $html = '<div style="padding:12px;color:#999;font-size:13px;">No new likes</div>';
 } else {
     while ($row = $r->fetch_assoc()) {
         $html .= "<div class='dd-item'>
