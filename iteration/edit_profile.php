@@ -338,6 +338,9 @@ textarea:focus {
         flex-direction: column;
         align-items: flex-start;
     }
+
+
+
 }
 </style>
 </head>
@@ -386,7 +389,7 @@ textarea:focus {
                         rows="5"
                     ><?= htmlspecialchars($bioCurrent) ?></textarea>
                     <div class="helper-text">
-                        Max 160 merkkiä.
+                        Max 160 characters.
                     </div>
                     <div id="bio-counter" class="char-counter"></div>
                 </div>
@@ -402,10 +405,11 @@ textarea:focus {
                             </div>
                         <?php endif; ?>
 
-                        <div>
-                            <input class="file-input" type="file" name="profile_picture" accept=".jpg,.jpeg,.png,.webp">
-                            <div class="helper-text">Vain JPG, PNG tai WEBP on sallittu.</div>
-                        </div>
+                        <div class="profile-preview">
+                        <input id="profile_picture" type="file" name="profile_picture" accept=".jpg,.jpeg,.png,.webp" hidden>
+                        <label for="profile_picture" class="custom-file-label">Choose File</label>
+                        <div class="helper-text">Only JPG, PNG or WEBP is allowed.</div>
+</div>
                     </div>
                 </div>
 
