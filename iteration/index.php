@@ -236,9 +236,13 @@ a:hover {
     top: 20px;
 }
 
-/* add vertical space between sidebar cards */
+
 .left-column .card + .card,
 .right-column .card + .card {
+    margin-top: 16px;
+}
+
+main .card + .card {
     margin-top: 16px;
 }
 
@@ -444,6 +448,38 @@ a:hover {
     box-shadow: 0 8px 18px rgba(255, 111, 181, 0.4);
     transition: transform 0.08s ease, box-shadow 0.12s ease, filter 0.12s ease;
 }
+
+/* Feed action buttons: Edit, Delete, Like, Unlike, Repost, comments, etc. */
+#feed button,
+#feed input[type="button"],
+#feed input[type="submit"] {
+    border-radius: 999px;
+    border: 1px solid var(--accent-soft);
+    background: #ffffff;
+    padding: 4px 10px;
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    color: var(--text-soft);
+    margin-right: 4px;
+    margin-top: 4px;
+    transition:
+        background 0.12s,
+        border-color 0.12s,
+        transform 0.08s,
+        box-shadow 0.12s;
+}
+
+#feed button:hover,
+#feed input[type="button"]:hover,
+#feed input[type="submit"]:hover {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--accent-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(255, 111, 181, 0.3);
+}
+
 
 .search-form button:hover {
     filter: brightness(1.05);
