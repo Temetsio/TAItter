@@ -88,60 +88,301 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
 <style>
-body{
-margin:0;font-family:Poppins,sans-serif;
-background:linear-gradient(135deg,#ff9a9e,#fad0c4,#fbc2eb);
-padding:20px;color:#1f1033
+:root {
+    --accent: #ff6fb5;
+    --accent-dark: #ff4fa5;
+    --accent-soft: #ffe5f3;
+    --bg-card: rgba(255, 255, 255, 0.97);
+    --input-border: #ffd4ec;
+    --text-main: #1f1033;
+    --text-soft: #5c4969;
 }
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 40%, #fbc2eb 100%);
+    padding: 32px 16px;
+    color: var(--text-main);
+    display: block;
+}
+
+
+.app-shell{
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+
+
 .card{
-max-width:720px;margin:auto;
-background:rgba(255,255,255,.95);
-padding:18px;border-radius:18px;
-box-shadow:0 16px 35px rgba(0,0,0,.25)
+    max-width: none;
+    margin: 0;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(18px);
+    border-radius: 18px;
+    padding: 16px 18px;
+    box-shadow: 0 16px 35px rgba(255,105,180,0.25);
+    position: relative;
+    overflow: hidden;
 }
-label{font-size:13px;font-weight:600}
-input,textarea{
-width:100%;padding:10px;
-border-radius:12px;border:1.5px solid #ffd4ec;
-font:inherit
+
+.card::before{
+    content: "";
+    position: absolute;
+    inset: -40px;
+    background:
+        radial-gradient(circle at top left, rgba(255,255,255,0.6), transparent 55%),
+        radial-gradient(circle at bottom right, rgba(255,255,255,0.5), transparent 55%);
+    opacity: .5;
+    pointer-events: none;
 }
-textarea{min-height:90px}
-button{
-margin-top:10px;border:none;
-padding:10px 20px;border-radius:999px;
-background:linear-gradient(135deg,#ff6fb5,#ff4fa5);
-color:#fff;font-weight:600;cursor:pointer
+
+.card-inner{
+    position: relative;
+    z-index: 1;
 }
-.error{
-background:#ffe2ea;color:#b0003a;
-padding:8px;border-radius:12px;
-margin-bottom:6px;font-size:13px
+
+
+.topbar{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
 }
-.preview{display:flex;gap:16px;align-items:center;margin-top:6px}
-.preview img{
-width:96px;height:96px;border-radius:50%;
-object-fit:cover;box-shadow:0 10px 20px rgba(0,0,0,.2)
+
+.topbar-left{
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
-.file-btn{
-display:inline-block;padding:8px 14px;
-background:linear-gradient(135deg,#ff6fb5,#ff4fa5);
-color:white;border-radius:999px;
-cursor:pointer;font-size:13px;font-weight:600
+
+.logo-badge{
+    width: 40px;
+    height: 40px;
+    border-radius: 14px;
+    background: linear-gradient(135deg,#ff6fb5,#ffc75f);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 700;
+    font-size: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
 }
-.file-btn:hover{filter:brightness(1.05)}
-.counter{font-size:11px;color:#5c4969;text-align:right}
+
+.app-title{
+    display: flex;
+    flex-direction: column;
+}
+
+.app-title span:first-child{
+    font-weight: 600;
+    font-size: 18px;
+}
+
+.app-title span:last-child{
+    font-size: 12px;
+    color: #5c4969;
+}
+
+.topbar-right{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.btn-outline{
+    border-radius: 999px;
+    border: 1.5px solid #ffe5f3;
+    background: rgba(255,255,255,0.9);
+    padding: 7px 14px;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    color: #5c4969;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    transition: background 0.12s, border-color 0.12s, transform 0.08s;
+}
+
+.btn-outline:hover{
+    background: #ffe5f3;
+    border-color: #ff6fb5;
+    transform: translateY(-1px);
+}
+
+
+
+.card {
+    width: 100%;
+    max-width: 900px;
+    background: var(--bg-card);
+    backdrop-filter: blur(18px);
+    border-radius: 24px;
+    padding: 32px 40px 28px;
+    box-shadow: 0 16px 35px rgba(255, 105, 180, 0.25);
+}
+
+h2 {
+    margin: 0 0 24px;
+    font-size: 26px;
+}
+
+form > label {
+    display: block;
+    margin-top: 18px;
+    margin-bottom: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-soft);
+}
+
+input,
+textarea {
+    width: 100%;
+    padding: 11px 12px;
+    border-radius: 14px;
+    border: 1.5px solid var(--input-border);
+    font: inherit;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s, transform 0.08s;
+}
+
+input:focus,
+textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(255, 111, 181, 0.25);
+    transform: translateY(-1px);
+}
+
+textarea {
+    min-height: 110px;
+    resize: vertical;
+}
+
+.counter {
+    font-size: 11px;
+    color: var(--text-soft);
+    text-align: right;
+    margin-top: 4px;
+}
+
+.error {
+    background: #ffe5f1;
+    color: #b0003a;
+    padding: 10px 12px;
+    border-radius: 14px;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+
+.preview {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    margin-top: 8px;
+}
+
+.preview img {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 12px 26px rgba(255, 111, 181, 0.45);
+}
+
+.file-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 10px 22px rgba(255, 111, 181, 0.45);
+    border: none;
+    transition: filter 0.12s, transform 0.08s;
+}
+
+.file-btn:hover {
+    filter: brightness(1.05);
+    transform: translateY(-1px);
+}
+
+#fileName {
+    font-size: 13px;
+    color: var(--text-soft);
+}
+
+.save-btn {
+    margin-top: 24px;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 12px 26px rgba(255, 111, 181, 0.45);
+    transition: filter 0.12s, transform 0.08s;
+}
+
+.save-btn:hover {
+    filter: brightness(1.05);
+    transform: translateY(-1px);
+}
+
 </style>
 </head>
 <body>
+<div class="app-shell">
 
-<div class="card">
-<h2>Edit profile</h2>
+    <!-- Top bar -->
+    <div class="card">
+        <div class="card-inner topbar">
+            <div class="topbar-left">
+                <div class="logo-badge">T</div>
+                <div class="app-title">
+                    <span>TAltter</span>
+                    <span>Edit profile</span>
+                </div>
+            </div>
+            <div class="topbar-right">
+                <a href="index.php" class="btn-outline">← Back to feed</a>
+                <a href="logout.php" class="btn-outline">Logout</a>
+            </div>
+        </div>
+    </div>
 
-<?php foreach ($errors as $e): ?>
-<div class="error"><?= htmlspecialchars($e) ?></div>
-<?php endforeach; ?>
+    <!-- Edit form card -->
+    <div class="card">
+        <div class="card-inner">
+            <h2>Edit profile</h2>
 
-<form method="post" enctype="multipart/form-data">
+            <?php foreach ($errors as $e): ?>
+                <div class="error"><?= htmlspecialchars($e) ?></div>
+            <?php endforeach; ?>
+
+            <form method="post" enctype="multipart/form-data">
 
 <label>Username</label>
 <input type="text" name="username" value="<?= htmlspecialchars($usernameCurrent) ?>">
@@ -161,7 +402,8 @@ cursor:pointer;font-size:13px;font-weight:600
 <span id="fileName"></span>
 </div>
 
-<button>Save changes</button>
+<button class="save-btn">Save changes</button>
+
 
 </form>
 </div>
