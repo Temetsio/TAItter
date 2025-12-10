@@ -488,7 +488,17 @@ a:hover {
             <h2 class="section-title">Recent posts</h2>
             <div class="post-list">
                 <?php
-                $stmt = $mysqli->prepare("SELECT post_id, content, created_at FROM posts WHERE user_id = ? ORDER BY created_at DESC LIMIT 50");
+                $stmt = $mysqli->prepare("
+                    SELECT 
+                    post_id, 
+                    content, 
+                    DATE_FORMAT(created_at, '%d.%m.%Y %H:%i') AS created_at
+                    FROM posts 
+                    WHERE user_id = ? 
+                    ORDER BY created_at DESC 
+                    LIMIT 50
+                    ");
+
                 $stmt->bind_param('i', $row['user_id']);
                 $stmt->execute();
                 $r = $stmt->get_result();

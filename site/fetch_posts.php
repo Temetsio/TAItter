@@ -9,7 +9,10 @@ if ($hashtag) {
         SELECT 
             p.post_id,
             p.content,
-            p.created_at,
+
+            -- ★ CHANGED HERE
+            DATE_FORMAT(p.created_at, '%d.%m.%Y %H:%i') AS created_at,
+
             p.edited_at,
             p.user_id,
             u.username,
@@ -27,13 +30,18 @@ if ($hashtag) {
     ";
     $stmt = $mysqli->prepare($sql);
     $stmt->bind_param("is", $currentUserId, $hashtag);
+
 } else {
+
     $sql = "
         (
             SELECT 
                 p.post_id,
                 p.content,
-                p.created_at,
+
+                -- ★ CHANGED HERE
+                DATE_FORMAT(p.created_at, '%d.%m.%Y %H:%i') AS created_at,
+
                 p.edited_at,
                 p.user_id,
                 u.username,
@@ -49,7 +57,10 @@ if ($hashtag) {
             SELECT 
                 p.post_id,
                 p.content,
-                r.created_at,
+
+                -- ★ CHANGED HERE (repost timestamp!)
+                DATE_FORMAT(r.created_at, '%d.%m.%Y %H:%i') AS created_at,
+
                 p.edited_at,
                 p.user_id,
                 u2.username,
