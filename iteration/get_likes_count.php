@@ -6,7 +6,6 @@ header('Content-Type: application/json');
 
 $uid = current_user_id();
 
-// Hae count ILMAN aikaleiman päivitystä
 $stmt = $mysqli->prepare("
     SELECT COUNT(*) AS cnt
     FROM likes l
@@ -21,7 +20,6 @@ $stmt->bind_param("ii", $uid, $uid);
 $stmt->execute();
 $count = $stmt->get_result()->fetch_assoc()['cnt'];
 
-// Hae HTML jos dropdown on auki
 $stmt2 = $mysqli->prepare("
     SELECT u.username, p.content, l.created_at
     FROM likes l

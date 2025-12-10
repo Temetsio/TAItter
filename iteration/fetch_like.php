@@ -1,3 +1,4 @@
+
 <?php
 require_once 'config.php';
 
@@ -19,7 +20,6 @@ $stmt->bind_param("ii", $uid, $uid);
 $stmt->execute();
 $unseenCount = $stmt->get_result()->fetch_assoc()['cnt'];
 
-// Hae tykkäysten lista dropdownia varten (vain uudet)
 $stmt2 = $mysqli->prepare("
     SELECT u.username AS username, p.content AS content, l.created_at AS created_at
     FROM likes l
@@ -50,7 +50,6 @@ if ($r->num_rows === 0) {
     }
 }
 
-// Palauta JSON-muodossa
 if (isset($_GET['json']) && $_GET['json']) {
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode([
@@ -61,5 +60,4 @@ if (isset($_GET['json']) && $_GET['json']) {
     exit;
 }
 
-// Vanha tapa: palauta pelkkä HTML
 echo $likesList;

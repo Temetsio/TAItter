@@ -85,7 +85,6 @@ while ($row = $res->fetch_assoc()) {
     $likeText = $row['user_has_liked'] ? 'Unlike' : 'Like';
     $likeCount = $row['like_count'];
 
-    // comment_count oletetaan nyt mukana rivissä
     $commentCount = isset($row['comment_count']) ? (int)$row['comment_count'] : 0;
 
     echo "<div class='card' id='post-{$row['post_id']}'>";

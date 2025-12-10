@@ -7,7 +7,6 @@ if (!$user) {
     exit;
 }
 
-// find profile user
 $stmt = $mysqli->prepare("SELECT user_id, username FROM users WHERE username = ?");
 $stmt->bind_param('s', $user);
 $stmt->execute();
@@ -19,7 +18,6 @@ if (!$profile) {
 }
 $profileUserId = $profile['user_id'];
 
-// fetch followers
 $stmt = $mysqli->prepare("
     SELECT u.user_id, u.username, u.bio, u.profile_picture_url
     FROM follows f
