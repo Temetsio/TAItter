@@ -686,7 +686,7 @@ a:hover {
 
             <div class="card">
                 <div class="card-inner">
-                    <h4 class="sidebar-heading">Following hashtags</h4>
+                    <h4 class="sidebar-heading">Liked hashtags</h4>
                     <p class="sidebar-sub">Click to filter your feed.</p>
                     <div>
                         <?php
@@ -704,7 +704,7 @@ a:hover {
 
             <div class="card">
                 <div class="card-inner">
-                    <h4 class="sidebar-heading">Following users</h4>
+                    <h4 class="sidebar-heading">Liked users</h4>
                     <p class="sidebar-sub">People whose posts you see more.</p>
                     <div>
                     <?php
@@ -800,13 +800,13 @@ a:hover {
                             <form method="post" action="follow_hashtag.php" style="margin-top:8px;">
                                 <input type="hidden" name="hashtag" value="<?= htmlspecialchars($filterHashtag) ?>">
                                 <input type="hidden" name="action" value="unfollow">
-                                <button type="submit" class="btn-outline">Unfollow #<?= htmlspecialchars($filterHashtag) ?></button>
+                                <button type="submit" class="btn-outline">Unlike #<?= htmlspecialchars($filterHashtag) ?></button>
                             </form>
                         <?php else: ?>
                             <form method="post" action="follow_hashtag.php" style="margin-top:8px;">
                                 <input type="hidden" name="hashtag" value="<?= htmlspecialchars($filterHashtag) ?>">
                                 <input type="hidden" name="action" value="follow">
-                                <button type="submit" class="btn-pill">Follow #<?= htmlspecialchars($filterHashtag) ?></button>
+                                <button type="submit" class="btn-pill">Like #<?= htmlspecialchars($filterHashtag) ?></button>
                             </form>
                         <?php endif; ?>
                     </div>

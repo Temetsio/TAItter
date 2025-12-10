@@ -441,11 +441,11 @@ a:hover {
 <div class="profile-stats">
     <a class="profile-stat-link" href="followers.php?u=<?= urlencode($row['username']) ?>">
         <span class="profile-stat-number"><?= $followersCount ?></span>
-        <span class="profile-stat-label">Followers</span>
+        <span class="profile-stat-label">Likers</span>
     </a>
     <a class="profile-stat-link" href="following.php?u=<?= urlencode($row['username']) ?>">
         <span class="profile-stat-number"><?= $followingCount ?></span>
-        <span class="profile-stat-label">Following</span>
+        <span class="profile-stat-label">Liked</span>
     </a>
 </div>
 
@@ -468,13 +468,13 @@ a:hover {
                             <form method="post" action="follow.php" style="display:inline;">
                                 <input type="hidden" name="username" value="<?= htmlspecialchars($row['username']) ?>">
                                 <input type="hidden" name="action" value="unfollow">
-                                <button type="submit" class="btn-secondary">Unfollow</button>
+                                <button type="submit" class="btn-secondary">Unlike</button>
                             </form>
                         <?php else: ?>
                             <form method="post" action="follow.php" style="display:inline;">
                                 <input type="hidden" name="username" value="<?= htmlspecialchars($row['username']) ?>">
                                 <input type="hidden" name="action" value="follow">
-                                <button type="submit" class="btn-primary">Follow</button>
+                                <button type="submit" class="btn-primary">Like</button>
                             </form>
                         <?php endif; ?>
                     <?php endif; ?>
