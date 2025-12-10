@@ -16,7 +16,17 @@ if (!$postId) {
 }
 
 $stmt = $mysqli->prepare("
-  SELECT c.comment_id, c.content, c.created_at, c.edited_at, u.user_id, u.username, u.profile_picture_url
+  SELECT 
+    c.comment_id, 
+    c.content,
+
+    -- ★ Changed here: Finnish format date
+    DATE_FORMAT(c.created_at, '%d.%m.%Y %H:%i') AS created_at,
+
+    c.edited_at, 
+    u.user_id, 
+    u.username, 
+    u.profile_picture_url
   FROM comments c
   JOIN users u ON c.user_id = u.user_id
   WHERE c.post_id = ?
@@ -34,7 +44,7 @@ while ($row = $res->fetch_assoc()) {
     'user_id' => (int)$row['user_id'],
     'username' => $row['username'],
     'content' => $row['content'],
-    'created_at' => $row['created_at'],
+    'created_at' => $row['created_at'], // already formatted
     'edited_at' => $row['edited_at'] ?? null
   ];
 }
