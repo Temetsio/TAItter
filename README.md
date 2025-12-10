@@ -12,7 +12,7 @@ Taitter on Twitter-tyyppinen sosiaalisen median sovellus TAI:n opiskelijoille, j
 ## Ominaisuudet
 
 - **Viestit (Posts)**: Käyttäjät voivat julkaista enintään 144 merkin pituisia viestejä
-- **Seuraaminen**: Käyttäjät voivat seurata toisiaan
+- **Seuraaminen/Käyttäjästä tykkäys**: Käyttäjät voivat tykätä toisistaan
 - **Hashtagit**: Viesteihin voi lisätä hashtageja ja käyttäjät voivat seurata hashtageja
 - **Maininnat**: Käyttäjät voivat mainita toisia käyttäjiä viesteissään
 - **Tykkäykset**: Viesteistä voi tykätä
