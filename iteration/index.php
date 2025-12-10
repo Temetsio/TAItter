@@ -628,7 +628,7 @@ a:hover {
 
                 <!-- Likes dropdown -->
                 <div class="dropdown">
-                    <a href="#" class="dropdown-toggle" onclick="toggleDropdown('likes', this);return false%;">
+                    <a href="#" class="dropdown-toggle" onclick="toggleDropdown('likes', this);return false;">
                         <span>❤️ Likes</span>
                         <span class="badge"><?= $lk ?></span>
                     </a>
@@ -893,12 +893,16 @@ function toggleDropdown(id, el) {
   let open = box.classList.toggle('show');
 
   if (open) {
-    markSeen(id);
-    let badge = el.querySelector('.badge');
-    if (badge) badge.textContent = '0';
-        if (id === 'likes') {
-            refreshLikesDropdown();
-        }
+    if (id === 'likes') {
+        markSeen('likes');
+        let badge = el.querySelector('.badge');
+        if (badge) badge.textContent = '0';
+        refreshLikesDropdown();
+    } else {
+        markSeen(id);
+        let badge = el.querySelector('.badge');
+        if (badge) badge.textContent = '0';
+    }
   }
 }
 
@@ -979,7 +983,6 @@ function savePost(postId) {
 
 //  LIKE
 function toggleLike(postId, button, uniqueCardId) {
-    // uniqueCardId is optional; fall back to postId when not provided
     const id = (typeof uniqueCardId !== 'undefined' && uniqueCardId !== null) ? uniqueCardId : postId;
 
     let formData = new FormData();
@@ -998,13 +1001,13 @@ function toggleLike(postId, button, uniqueCardId) {
         if (text) text.textContent = (data.action === 'liked') ? 'Unlike' : 'Like';
         if (count) count.textContent = data.count;
 
-        try { refreshLikesDropdown(); } catch (e) { /* ignore */ }
-
         try {
             if (button && button instanceof HTMLElement) {
                 button.dataset.liked = (data.action === 'liked') ? '1' : '0';
             }
         } catch (e) { /* ignore */ }
+
+        updateLikesCount();
     })
     .catch(err => {
         console.error('toggleLike error', err);
@@ -1012,25 +1015,43 @@ function toggleLike(postId, button, uniqueCardId) {
     });
 }
 
+function updateLikesCount() {
+    fetch('fetch_like.php?json=1')
+        .then(res => res.json())
+        .then(data => {
+            if (!data.success) return;
+            
+            let likesToggle = document.querySelector('[onclick*="likes"]');
+            if (likesToggle) {
+                let badge = likesToggle.querySelector('.badge');
+                if (badge) {
+                    badge.textContent = data.count;
+                }
+            }
+        })
+        .catch(err => console.error('updateLikesCount error', err));
+}
+
 function refreshLikesDropdown() {
-        let menu = document.getElementById('likes');
-        if (!menu) return;
-        fetch('fetch_like.php?json=1')
-            .then(res => res.json())
-            .then(data => {
-                if (!data || !data.success) return;
-                let inner = menu.querySelector('.card-inner');
-                if (inner) inner.innerHTML = data.html;
-            })
-            .catch(err => console.error('refreshLikesDropdown', err));
+    let menu = document.getElementById('likes');
+    if (!menu) return;
+    
+    fetch('fetch_like.php?json=1')
+        .then(res => res.json())
+        .then(data => {
+            if (!data || !data.success) return;
+            let inner = menu.querySelector('.card-inner');
+            if (inner) inner.innerHTML = data.html;
+        })
+        .catch(err => console.error('refreshLikesDropdown', err));
 }
 
 (function startLikesPolling(){
-    const INTERVAL_MS = 10000; 
+    const INTERVAL_MS = 5000;
     setInterval(() => {
         try {
             if (document.hidden) return; 
-            refreshLikesDropdown();
+            updateLikesCount();
         } catch (e) {
             console.error('likes polling', e);
         }
@@ -1050,8 +1071,7 @@ document.addEventListener("click", function(e) {
     document.querySelectorAll('.dd-menu').forEach(el => el.classList.remove('show'));
   }
 });
-
-// Comments: open panel, load and post
+// COMMENTS
 function openComments(postId) {
     let panel = document.getElementById('comment-panel-' + postId);
     if (!panel) return;
@@ -1081,27 +1101,26 @@ function loadComments(postId) {
                 listEl.innerHTML = data.comments.map(c => {
                     let controls = '';
                     if (typeof CURRENT_USER_ID !== 'undefined' && c.user_id === CURRENT_USER_ID) {
-                                                controls = '<div style="margin-top:6px;">'
-                                                    + '<button type="button" onclick="editComment(' + postId + ',' + c.comment_id + ',\'' + encodeURIComponent(c.content) + '\')">Muokkaa</button>'
-                                                    + ' <button type="button" onclick="deleteComment(' + c.comment_id + ',' + postId + ')" style="color:red">Poista</button>'
-                                                    + '</div>';
+                        controls = '<div style="margin-top:6px;">'
+                            + '<button type="button" onclick="editComment(' + postId + ',' + c.comment_id + ',\'' + encodeURIComponent(c.content) + '\')">Muokkaa</button>'
+                            + ' <button type="button" onclick="deleteComment(' + c.comment_id + ',' + postId + ')" style="color:red">Poista</button>'
+                            + '</div>';
                     }
 
-                                        var editedLabel = '';
-                                        if (c.edited_at && c.edited_at !== null && c.edited_at !== c.created_at) {
-                                            editedLabel = ' <small style="color:#999;margin-left:6px;">(muokattu)</small>';
-                                        }
+                    var editedLabel = '';
+                    if (c.edited_at && c.edited_at !== null && c.edited_at !== c.created_at) {
+                        editedLabel = ' <small style="color:#999;margin-left:6px;">(muokattu)</small>';
+                    }
 
-                                        return '<div style="padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.05)" id="comment-' + c.comment_id + '">'
-                                                + '<a href="profile.php?u=' + encodeURIComponent(c.username) + '"><strong>@' + escapeHtml(c.username) + '</strong></a> '
-                                                + '<div class="comment-body-' + c.comment_id + '" style="font-size:14px;color:#111;margin-top:4px;">' + escapeHtml(c.content) + '</div>'
-                                                + '<div><small style="color:#999">' + c.created_at + '</small>' + editedLabel + '</div>'
-                                                + controls
-                                                + '</div>';
+                    return '<div style="padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.05)" id="comment-' + c.comment_id + '">'
+                        + '<a href="profile.php?u=' + encodeURIComponent(c.username) + '"><strong>@' + escapeHtml(c.username) + '</strong></a> '
+                        + '<div class="comment-body-' + c.comment_id + '" style="font-size:14px;color:#111;margin-top:4px;">' + escapeHtml(c.content) + '</div>'
+                        + '<div><small style="color:#999">' + c.created_at + '</small>' + editedLabel + '</div>'
+                        + controls
+                        + '</div>';
                 }).join('');
             }
 
-            // update comment count badge
             let cntEl = document.getElementById('comment-count-' + postId);
             if (cntEl) cntEl.textContent = data.comments ? data.comments.length : 0;
         })
@@ -1145,7 +1164,6 @@ function postComment(postId) {
         });
 }
 
-
 function escapeHtml(s) {
     return String(s)
         .replace(/&/g, '&amp;')
@@ -1155,7 +1173,6 @@ function escapeHtml(s) {
         .replace(/'/g, '&#039;');
 }
 
-// Edit comment in-place
 function editComment(postId, commentId, encodedContent) {
     let content = decodeURIComponent(encodedContent || '');
     let bodyEl = document.querySelector('.comment-body-' + commentId);
@@ -1286,7 +1303,6 @@ function refreshCommentCounts() {
     })
     .catch(err => console.error('refreshCommentCounts error', err));
 }
-
 
 console.log("JS LOADED OK");
 </script>
