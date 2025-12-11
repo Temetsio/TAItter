@@ -5,7 +5,6 @@ require_once 'config.php';
 $uid = current_user_id();
 if (!$uid) exit;
 
-// Hae uusien tykkäysten määrä (vain ne joita ei ole vielä nähty)
 $stmt = $mysqli->prepare("
     SELECT COUNT(*) AS cnt
     FROM likes l
