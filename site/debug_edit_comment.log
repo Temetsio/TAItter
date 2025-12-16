@@ -78,3 +78,23 @@ POST: Array
 
 USERID: 5
 Has mysqli: yes
+---
+2025-12-16T07:40:54+01:00
+POST: Array
+(
+    [comment_id] => 30
+    [content] => moikkamoi
+)
+
+USERID: 1
+Has mysqli: yes
+---
+2025-12-16T07:40:59+01:00
+POST: Array
+(
+    [comment_id] => 30
+    [content] => moikkamoi!
+)
+
+USERID: 1
+Has mysqli: yes
